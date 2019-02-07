@@ -13,10 +13,10 @@ logic p0, p1, p2, p3;
 logic g0, g1, g2, g3;
 logic c0, c1, c2, c3;
 
-full_adder FA0(.x(A[0]), .y(B[0]), .z(C0), .s(Sum[0]));
-full_adder FA1(.x(A[1]), .y(B[1]), .z(C1), .s(Sum[1]));
-full_adder FA2(.x(A[2]), .y(B[2]), .z(C2), .s(Sum[2]));
-full_adder FA3(.x(A[3]), .y(B[3]), .z(C3), .s(Sum[3]));
+full_adder FA0(.x(A[0]), .y(B[0]), .z(c0), .s(Sum[0]));
+full_adder FA1(.x(A[1]), .y(B[1]), .z(c1), .s(Sum[1]));
+full_adder FA2(.x(A[2]), .y(B[2]), .z(c2), .s(Sum[2]));
+full_adder FA3(.x(A[3]), .y(B[3]), .z(c3), .s(Sum[3]));
 
 assign Co = (c0 & p0 & p1 & p2 & p3) | (g0 & p1 & p2 & p3) | (g1 & p2 & p3) | (g2 & p3) | g3;
 assign Pg = p0 & p1 & p2 & p3;
@@ -61,10 +61,10 @@ logic p0, p4, p8, p12;
 logic g0, g4, g8, g12;
 logic c0, c4, c8, c12;
 
-cla4 CLA0(.A(A[3:0]), .B(B[3:0]), .z(C0), .s(Sum[3:0]), .Gg(g0), .Pg(p0));
-cla4 CLA1(.A(A[7:4]), .B(B[7:4]), .z(C4), .s(Sum[7:4]), .Gg(g4), .Pg(p4));
-cla4 CLA2(.A(A[11:8]), .B(B[11:8]), .z(C8), .s(Sum[11:8]), .Gg(g8), .Pg(p8));
-cla4 CLA3(.A(A[15:12]), .B(B[15:12]), .z(C12), .s(Sum[15:12]), .Gg(g12), .Pg(p12));
+cla4 CLA0(.A(A[3:0]), .B(B[3:0]), .Cin(C0), .Sum(Sum[3:0]), .Gg(g0), .Pg(p0));
+cla4 CLA1(.A(A[7:4]), .B(B[7:4]), .Cin(C4), .Sum(Sum[7:4]), .Gg(g4), .Pg(p4));
+cla4 CLA2(.A(A[11:8]), .B(B[11:8]), .Cin(C8), .Sum(Sum[11:8]), .Gg(g8), .Pg(p8));
+cla4 CLA3(.A(A[15:12]), .B(B[15:12]), .Cin(C12), .Sum(Sum[15:12]), .Gg(g12), .Pg(p12));
 
 assign Co = g12 | (g8 & p12) | (g4 & p12 & p8) | (g0 & p12 & g8 & g4);
 
