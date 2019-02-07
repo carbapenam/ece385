@@ -61,12 +61,12 @@ logic p0, p4, p8, p12;
 logic g0, g4, g8, g12;
 logic c0, c4, c8, c12;
 
-cla4 CLA0(.A(A[3:0]), .B(B[3:0]), .Cin(C0), .Sum(Sum[3:0]), .Gg(g0), .Pg(p0));
-cla4 CLA1(.A(A[7:4]), .B(B[7:4]), .Cin(C4), .Sum(Sum[7:4]), .Gg(g4), .Pg(p4));
-cla4 CLA2(.A(A[11:8]), .B(B[11:8]), .Cin(C8), .Sum(Sum[11:8]), .Gg(g8), .Pg(p8));
-cla4 CLA3(.A(A[15:12]), .B(B[15:12]), .Cin(C12), .Sum(Sum[15:12]), .Gg(g12), .Pg(p12));
+cla4 CLA0(.A(A[3:0]), .B(B[3:0]), .Cin(c0), .Sum(Sum[3:0]), .Gg(g0), .Pg(p0));
+cla4 CLA1(.A(A[7:4]), .B(B[7:4]), .Cin(c4), .Sum(Sum[7:4]), .Gg(g4), .Pg(p4));
+cla4 CLA2(.A(A[11:8]), .B(B[11:8]), .Cin(c8), .Sum(Sum[11:8]), .Gg(g8), .Pg(p8));
+cla4 CLA3(.A(A[15:12]), .B(B[15:12]), .Cin(c12), .Sum(Sum[15:12]), .Gg(g12), .Pg(p12));
 
-assign Co = g12 | (g8 & p12) | (g4 & p12 & p8) | (g0 & p12 & g8 & g4);
+assign Co = g12 | (g8 & p12) | (g4 & p12 & p8) | (g0 & p12 & p8 & p4);
 
 always_comb
 	begin
