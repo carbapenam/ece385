@@ -22,7 +22,8 @@ ripple_adder ripple_adder_inst
         .Sum(result_ra), // Connects the Sum_comb wire in this file to the Sum wire in ripple_adder.sv
         .Co(ra_co)
 );
-	 
+
+/*	 
     carry_lookahead_adder hello
     (
         .A,             // This is shorthand for .A(A) when both wires/registers have the same name
@@ -30,8 +31,8 @@ ripple_adder ripple_adder_inst
         .Sum(result_cla), // Connects the Sum_comb wire in this file to the Sum wire in ripple_adder.sv
         .Co(cla_co)
     );
-
-    carry_select_adder stf
+*/
+    carry_select_adder wtf
     (
         .A,             // This is shorthand for .A(A) when both wires/registers have the same name
         .B,

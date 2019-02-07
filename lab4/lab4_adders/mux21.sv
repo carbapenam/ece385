@@ -1,12 +1,12 @@
 module mux21_4bit
 (
-input [3:0] In0,
-input [3:0] In1,
-input		   Sel,
-output [3:0] Out
+input logic  [3:0] In0,
+input logic  [3:0] In1,
+input	logic	       Sel,
+output logic [3:0] Out
 );
 					 
-always @ (In0 or In1 or Sel)
+always_comb
 	begin	
 		case (Sel)
 			1'b0     : Out = In0;
@@ -17,11 +17,11 @@ endmodule
 
 module mux21_1bit
 (
-input In0, In1, Sel,
-output Out
+input logic In0, In1, Sel,
+output logic Out
 );
 					 
-always @ (In0 or In1 or Sel)
+always_comb
 	begin	
 		case (Sel)
 			1'b0     : Out = In0;

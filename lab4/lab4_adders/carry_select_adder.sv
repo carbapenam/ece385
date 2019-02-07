@@ -42,10 +42,5 @@ module carry_select_adder
 	  mux21_1bit CO_MUX12(.In0(c12_0), .In1(c12_1), .Sel(c8_final), .Out(c12_final));
 	  mux21_1bit CO_MUX16(.In0(c16_0), .In1(c16_1), .Sel(c12_final), .Out(c16_final));
 	  
-	  assign Co = c16_final;
-	  
-	  
-	  
-
-     
+	  assign Co = c16_final;	 
 endmodule
