@@ -1,0 +1,9 @@
+# paths to ignore
+/docs
+/**/db
+/**/incremental_db
+/**/output_files
+/**/simulation
+
+# extensions to ignore
+*.bak
