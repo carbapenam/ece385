@@ -23,7 +23,7 @@ module lab4_adders_toplevel
     input   logic[15:0]     SW,         // From slider switches
     
     // all outputs are registered
-    output  logic           CO,         // Carry-out.  Goes to the green LED to the left of the hex displays.
+    output  logic           Co,         // Carry-out.  Goes to the green LED to the left of the hex displays.
     output  logic[15:0]     Sum,        // Goes to the red LEDs.  You need to press "Run" before the sum shows up here.
     output  logic[6:0]      Ahex0,      // Hex drivers display both inputs to the adder.
     output  logic[6:0]      Ahex1,
@@ -43,7 +43,7 @@ module lab4_adders_toplevel
      * Wheather an internal logic signal becomes a register or wire depends
      * on if it is written inside an always_ff or always_comb block respectivly */
     logic[15:0]     Sum_comb;
-    logic           CO_comb;
+    logic           Co_comb;
     logic[6:0]      Ahex0_comb;
     logic[6:0]      Ahex1_comb;
     logic[6:0]      Ahex2_comb;
@@ -61,7 +61,7 @@ module lab4_adders_toplevel
             A <= 16'h0000;
             B <= 16'h0000;
             Sum <= 16'h0000;
-            CO <= 1'b0;
+            Co <= 1'b0;
         end else if (!LoadB) begin
             // If LoadB is pressed, copy switches to register B
             B <= SW;
@@ -74,7 +74,7 @@ module lab4_adders_toplevel
         // every clock cycle that Run is pressed
         if (!Run) begin
             Sum <= Sum_comb;
-            CO <= CO_comb;
+            Co <= Co_comb;
         end
             // else, Sum and CO maintain their previous values
         
@@ -110,7 +110,7 @@ module lab4_adders_toplevel
         .A,             // This is shorthand for .A(A) when both wires/registers have the same name
         .B,
         .Sum(Sum_comb), // Connects the Sum_comb wire in this file to the Sum wire in ripple_adder.sv
-        .CO(CO_comb)
+        .Co(Co_comb)
     );
 	 
 //    carry_lookahead_adder carry_lookahead_adder_inst
@@ -118,7 +118,7 @@ module lab4_adders_toplevel
 //        .A,             // This is shorthand for .A(A) when both wires/registers have the same name
 //        .B,
 //        .Sum(Sum_comb), // Connects the Sum_comb wire in this file to the Sum wire in ripple_adder.sv
-//        .CO(CO_comb)
+//        .Co(Co_comb)
 //    );
 
 //    carry_select_adder carry_select_adder_inst
@@ -126,7 +126,7 @@ module lab4_adders_toplevel
 //        .A,             // This is shorthand for .A(A) when both wires/registers have the same name
 //        .B,
 //        .Sum(Sum_comb), // Connects the Sum_comb wire in this file to the Sum wire in ripple_adder.sv
-//        .CO(CO_comb)
+//        .Co(Co_comb)
 //    );
     
     HexDriver Ahex0_inst
