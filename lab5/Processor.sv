@@ -13,8 +13,8 @@ module Processor (input logic   Clk,     // Internal
 
 						output logic  X,	
 //                  output logic [7:0]  LED,     // DEBUG
-                  output logic [7:0]  Aval,    // DEBUG
-                                Bval,   
+//                  output logic [7:0]  Aval,    // DEBUG
+ //                               Bval,   
                   output logic [6:0]  AhexL,
                                 AhexU,
                                 BhexL,
@@ -25,13 +25,13 @@ module Processor (input logic   Clk,     // Internal
 	 logic Ld_A, Ld_B, newA, newB, A_0, B_0, Shift_En, Clear_A;
 	 logic [7:0] A, B, Din_S;
 	 logic [8:0] Result;
-	 logic fn, X;  // fn = 1 for sub; fn = 0 for add
+	 logic fn;  // fn = 1 for sub; fn = 0 for add
 	 
 	 
 	 //We can use the "assign" statement to do simple combinational logic
 	 assign Aval = A;
 	 assign Bval = B;
-	 assign LED = {Execute_SH,LoadA_SH,LoadB_SH,Reset_SH}; //Concatenate is a common operation in HDL
+	// assign LED = {Execute_SH,ClearA_LoadB_SH,Reset_SH}; //Concatenate is a common operation in HDL
 
 	 
 	 //Instantiation of modules here
@@ -43,7 +43,6 @@ module Processor (input logic   Clk,     // Internal
 								.Clear_A(ClearA),
                         .Shift_En,
                         .Din_A(Result[7:0]),
-								.Din_Clear({8{0}}),
 								.Din_B(Din_S),
                         .A_In(X),
                         .B_In(A_0),
@@ -55,7 +54,7 @@ module Processor (input logic   Clk,     // Internal
 								.A(A),
 								.S(Din_S),   // S is value of switches
 								.fn(fn),
-								.Result(Result)
+								.Result(Result),
 								.X(X)	);
  /*   compute          compute_unit (
 								.F(F_S),
@@ -81,7 +80,7 @@ module Processor (input logic   Clk,     // Internal
                         .Shift_En,
                         .Ld_A,
                         .Ld_B,
-								.fn(fn)
+								.fn(fn),
 							   .ClearA(Clear_A) );
 	 HexDriver        HexAL (
                         .In0(A[3:0]),
@@ -102,7 +101,7 @@ module Processor (input logic   Clk,     // Internal
 	  //These are array module instantiations
 	  //Note: S stands for SYNCHRONIZED, H stands for active HIGH
 	  //Note: We can invert the levels inside the port assignments
-	  sync button_sync[3:0] (Clk, {~Reset, ~ClearA_LoadB, ~Execute}, {Reset_SH, ClearA_LoadB_SH, Execute_SH});
+	  sync button_sync[2:0] (Clk, {~Reset, ~ClearA_LoadB, ~Execute}, {Reset_SH, ClearA_LoadB_SH, Execute_SH});
 	  sync Din_sync[7:0] (Clk, Din, Din_S);
 	  
 endmodule

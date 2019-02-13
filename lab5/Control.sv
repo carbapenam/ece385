@@ -1,12 +1,12 @@
 //Two-always example for state machine
 
-module control (input  logic Clk, Reset, ClearA_LoadB, Execute, M0
+module control (input  logic Clk, Reset, ClearA_LoadB, Execute, M0,
                 output logic Shift_En, Ld_A, Ld_B, fn, ClearA );
 
     // Declare signals curr_state, next_state of type enum
     // with enum values of A, B, ..., F as the state values
 	 // Note that the length implies a max of 8 states, so you will need to bump this up for 8-bits
-    enum logic [3:0] {A, B, C, D,  E, F, G, H,  I, J, K, L,  M, N, O, P}   curr_state, next_state; 
+    enum logic [4:0] {S, A, B, C, D,  E, F, G, H,  I, J, K, L,  M, N, O, P, Q}   curr_state, next_state; 
 
 	//updates flip flop, current state is the only one
     always_ff @ (posedge Clk)  
@@ -18,7 +18,7 @@ module control (input  logic Clk, Reset, ClearA_LoadB, Execute, M0
     end
 
     // Assign outputs based on state
-	always_comb
+	always_ff @ (posedge Clk) 
     begin
         
 		  next_state  = curr_state;	//required because I haven't enumerated all possibilities below

@@ -7,9 +7,13 @@ module register_unit (input  logic Clk, Reset, A_In, B_In, Ld_A, Ld_B,
                       output logic [7:0]  B);
 	logic DinA;
 	
+always_ff @ (posedge Clk)  
+   begin
 	if (Clear_A)
-		DinA = 8'h0;
-	else DinA = Din_A;
+		DinA <= 8'h0;
+	else 
+		DinA <= Din_A;
+	end
 
     reg_8  reg_A (.*, .D(DinA), .Shift_In(A_In), .Load(Ld_A),
 	               .Shift_Out(A_out), .Data_Out(A));
