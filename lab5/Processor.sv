@@ -29,8 +29,8 @@ module Processor (input logic   Clk,     // Internal
 	 
 	 
 	 //We can use the "assign" statement to do simple combinational logic
-	 assign Aval = A;
-	 assign Bval = B;
+	// assign Aval = A;
+	// assign Bval = B;
 	// assign LED = {Execute_SH,ClearA_LoadB_SH,Reset_SH}; //Concatenate is a common operation in HDL
 
 	 
@@ -56,21 +56,7 @@ module Processor (input logic   Clk,     // Internal
 								.fn(fn),
 								.Result(Result),
 								.X(X)	);
- /*   compute          compute_unit (
-								.F(F_S),
-                        .A_In(opA),
-                        .B_In(opB),
-                        .A_Out(bitA),
-                        .B_Out(bitB),
-                        .F_A_B );
-    router           router (
-								.R(R_S),
-                        .A_In(bitA),
-                        .B_In(bitB),
-                        .A_Out(newA),
-                        .B_Out(newB),
-                        .F_A_B );
-*/
+
 	 control          control_unit (
                         .Clk(Clk),
                         .Reset(Reset_SH),
