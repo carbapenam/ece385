@@ -20,9 +20,9 @@ module ADD_SUB9
 (
 	input		logic[7:0]		A,
 	input		logic[7:0]		S,
-	input		logic			fn,  // fn=0 for add and fn=1 for subtract
-	output	logic[8:0]		Result, // 9 bit result
-	output 	logic			X
+	input		logic			   fn,  // fn=0 for add and fn=1 for subtract
+	output	logic[8:0]     Result, // 9 bit result
+	output 	logic			   X
 );
 
 	logic c4, c8;
@@ -32,7 +32,7 @@ module ADD_SUB9
 	assign SS = (S ^ {8{fn}});  //when fn = 1, complement S
 	assign A8 = A[7];   //sign extension bit
 	assign SS8 = SS[7];
-	ra4 RA0(.A(A[3:0]), .B(SS[3:0]), .Sum(Result[3:0]), .Cin(0), .Co(c4));
+	ra4 RA0(.A(A[3:0]), .B(SS[3:0]), .Sum(Result[3:0]), .Cin(1'b0), .Co(c4));
 	ra4 RA4(.A(A[7:4]), .B(SS[7:4]), .Sum(Result[7:4]), .Cin(c4), .Co(c8));
 	full_adder FA(.x(A8), .y(SS8), .z(c8), .s(Result[8]), .c());
 	assign X = Result[8];

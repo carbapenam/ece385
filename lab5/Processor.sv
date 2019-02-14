@@ -10,11 +10,10 @@ module Processor (input logic   Clk,     // Internal
                                 ClearA_LoadB,   // Push button 2
                                 Execute, // Push button 3
                   input  logic [7:0]  Din,     // input data
-
+				      output logic [4:0] debug,
 						output logic  X,	
-//                  output logic [7:0]  LED,     // DEBUG
-//                  output logic [7:0]  Aval,    // DEBUG
- //                               Bval,   
+                  output logic [7:0]  Aval,    // DEBUG
+                                      Bval,   
                   output logic [6:0]  AhexL,
                                 AhexU,
                                 BhexL,
@@ -22,25 +21,21 @@ module Processor (input logic   Clk,     // Internal
 
 	 //local logic variables go here
 	 logic Reset_SH, ClearA_LoadB_SH, Execute_SH;
-	 logic Ld_A, Ld_B, newA, newB, A_0, B_0, Shift_En, Clear_A;
+	 logic Ld_A, Ld_B, A_0, B_0, Shift_En, Clear_A;
 	 logic [7:0] A, B, Din_S;
 	 logic [8:0] Result;
-	 logic fn;  // fn = 1 for sub; fn = 0 for add
+	 logic fn;  // fn = 1 for sub; fn = 0 for add	 
 	 
-	 
-	 //We can use the "assign" statement to do simple combinational logic
-	// assign Aval = A;
-	// assign Bval = B;
-	// assign LED = {Execute_SH,ClearA_LoadB_SH,Reset_SH}; //Concatenate is a common operation in HDL
-
+	 assign Aval = A;
+	 assign Bval = B;
 	 
 	 //Instantiation of modules here
 	 register_unit    reg_unit (
-                        .Clk(Clk),
+                        .Clk,
                         .Reset(Reset_SH),
-                        .Ld_A, //note these are inferred assignments, because of the existence a logic variable of the same name
+                        .Ld_A,
                         .Ld_B,
-								.Clear_A(ClearA),
+								.Clear_A,
                         .Shift_En,
                         .Din_A(Result[7:0]),
 								.Din_B(Din_S),
@@ -49,16 +44,17 @@ module Processor (input logic   Clk,     // Internal
                         .A_out(A_0),
                         .B_out(B_0),  //B_0 is M
                         .A(A),
-                        .B(B) );
+                        .B(B));
+								
 	 ADD_SUB9		compute(
-								.A(A),
+								.A,
 								.S(Din_S),   // S is value of switches
-								.fn(fn),
-								.Result(Result),
-								.X(X)	);
+								.fn,
+								.Result,
+								.X);
 
 	 control          control_unit (
-                        .Clk(Clk),
+                        .Clk,
                         .Reset(Reset_SH),
                         .ClearA_LoadB(ClearA_LoadB_SH),
                         .Execute(Execute_SH),
@@ -66,8 +62,9 @@ module Processor (input logic   Clk,     // Internal
                         .Shift_En,
                         .Ld_A,
                         .Ld_B,
-								.fn(fn),
-							   .ClearA(Clear_A) );
+								.fn,
+							   .ClearA(Clear_A),
+								.debug);
 	 HexDriver        HexAL (
                         .In0(A[3:0]),
                         .Out0(AhexL) );

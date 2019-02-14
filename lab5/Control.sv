@@ -1,137 +1,97 @@
 //Two-always example for state machine
 
 module control (input  logic Clk, Reset, ClearA_LoadB, Execute, M0,
-                output logic Shift_En, Ld_A, Ld_B, fn, ClearA );
+                output logic Shift_En, Ld_A, Ld_B, fn, ClearA, 
+					 output logic[4:0] debug);
 
     // Declare signals curr_state, next_state of type enum
     // with enum values of A, B, ..., F as the state values
 	 // Note that the length implies a max of 8 states, so you will need to bump this up for 8-bits
-    enum logic [4:0] {S, A, B, C,  D, E, F, G,  H, I, J, K,  L, M, N, O,  P, Q}   curr_state, next_state; 
-
+    enum logic [4:0] {Start, A0, S0, A1, S1, A2, S2, A3, S3, A4, S4, A5, S5, A6, S6, SUB7, S7, Finish} curr_state, next_state; 
+	
+	 assign debug = curr_state;
 	//updates flip flop, current state is the only one
-    always_ff @ (posedge Clk)  
+    always_ff @ (posedge Clk or posedge Reset)  
     begin
         if (Reset)
-            curr_state <= S;
+            curr_state = Start;
         else 
-            curr_state <= next_state;
+            curr_state = next_state;
     end
 
     // Assign outputs based on state
-	always_ff @ (posedge Clk) 
-    begin
-        
-		  next_state  = curr_state;	//required because I haven't enumerated all possibilities below
+	always_comb
+    begin        
+		  next_state = curr_state;	//required because I haven't enumerated all possibilities below
         unique case (curr_state) 
-
-            S :    if (Execute)
-                       next_state = A;
-				A :    next_state = B;
-            B :    next_state = C;
-            C :    next_state = D;
-				D :	 next_state = E;
-				E :	 next_state = F;
-				F :	 next_state = G;
-				G :	 next_state = H;				
-            H :    next_state = I;
-            I :    next_state = J;
-				J :    next_state = K;
-				K :    next_state = L;
-				L :    next_state = M;
-				M :    next_state = N;
-				N :    next_state = O;
-				O :    next_state = P;
-				P :    next_state = Q;
-            Q :    if (~Execute) 
-                       next_state = A;
+            Start : if (Execute)
+                    next_state = A0;
+				A0 :    next_state = S0;
+            S0 :    next_state = A1;
+            A1 :    next_state = S1;
+				S1 :	  next_state = A2;
+				A2 :	  next_state = S2;
+				S2 :	  next_state = A3;
+				A3 :	  next_state = S3;				
+            S3 :    next_state = A4;
+            A4 :    next_state = S4;
+				S4 :    next_state = A5;
+				A5 :    next_state = S5;
+				S5 :    next_state = A6;
+				A6 :    next_state = S6;
+				S6 :    next_state = SUB7;
+				SUB7 :  next_state = S7;
+				S7 :    next_state = Finish;
+            Finish :   if (~Execute) 
+                       next_state = Start;
 							  
         endcase
-   
+  end
+ 
+always_comb
+begin 
 		  // Assign outputs based on ‘state’
-        case (curr_state) 
-				S:  //starting state
+        unique case (curr_state) 
+				Start:  //starting state
 				begin
-					 fn = 1'b0;
-					 ClearA = ClearA_LoadB;
-					 Ld_A = 1'b0;
-					 Ld_B = ClearA_LoadB;
-					 Shift_En = 1'b0;
+					 fn <= 1'b0;
+					 ClearA <= ClearA_LoadB;
+					 Ld_A <= 1'b0;
+					 Ld_B <= ClearA_LoadB;
+					 Shift_En <= 1'b0;
 				end
-				Q:  // end state, idle
+
+				Finish:  // end state, idle
 		      begin
-                Ld_A = 1'b0;
-                Ld_B = 1'b0;
-					 ClearA = 1'b0;
-                Shift_En = 1'b0;
-		      end
-	   	   A: // 1st add
-	         begin
-					 fn = 1'b0;
-                Ld_A = M0;
-                Ld_B = 1'b0;
-					 ClearA = 1'b0;
-                Shift_En = 1'b0;
+                fn <= 1'b0;				
+                Ld_A <= 1'b0;
+                Ld_B <= 1'b0;
+					 ClearA <= 1'b0;
+                Shift_En <= 1'b0;
 		      end
 
-				C:  //2nd add
+				A0,A1,A2,A3,A4,A5,A6:
 				begin
-					 Ld_A = M0;
-					 Ld_B = 1'b0;
-					 Shift_En = 1'b0;
-					 fn = 1'b0;
-					 ClearA = 1'b0;
+					 Ld_A <= M0;
+					 Ld_B <= 1'b0;
+					 Shift_En <= 1'b0;
+					 fn <= 1'b0;
+					 ClearA <= 1'b0;
 				end
-			   E:  //3rd add
+
+				SUB7:   //last operation, sub instead of add
 				begin
-					 Ld_A = M0;
-					 Ld_B = 1'b0;
-					 Shift_En = 1'b0;
-					 fn = 1'b0;
-					 ClearA = 1'b0;
+					 fn <= 1'b1;
+					 Ld_A <= M0;
+					 Ld_B <= 1'b0;
+					 Shift_En <= 1'b0;
+					 ClearA <= 1'b0;
 				end
-				G:   //4th add
-				begin
-					 Ld_A = M0;
-					 Ld_B = 1'b0;
-					 Shift_En = 1'b0;
-					 fn = 1'b0;
-					 ClearA = 1'b0;
-				end
-				I:    //5th add
-				begin
-					 Ld_A = M0;
-					 Ld_B = 1'b0;
-					 Shift_En = 1'b0;
-					 fn = 1'b0;
-					 ClearA = 1'b0;
-				end
-				K:   //6th add
-				begin
-					 Ld_A = M0;
-					 Ld_B = 1'b0;
-					 Shift_En = 1'b0;
-					 fn = 1'b0;
-					 ClearA = 1'b0;
-				end
-				M:    //7th add
-				begin
-					 Ld_A = M0;
-					 Ld_B = 1'b0;
-					 Shift_En = 1'b0;
-					 fn = 1'b0;
-					 ClearA = 1'b0;
-				end
-				O:   //last operation, sub instead of add
-				begin
-					 fn = 1'b1;
-					 Ld_A = M0;
-					 Ld_B = 1'b0;
-					 Shift_En = 1'b0;
-					 ClearA = 1'b0;
-				end
-	   	   default:  //all other cases, just shift
+				
+	   	   S0,S1,S2,S3,S4,S5,S6,S7:  //all other cases, just shift
 		      begin 
-                Ld_A = 1'b0;
+					 fn <= 1'b0;
+				    Ld_A = 1'b0;
                 Ld_B = 1'b0;
                 Shift_En = 1'b1;
 					 ClearA = 1'b0;
