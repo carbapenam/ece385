@@ -7,6 +7,7 @@ timeprecision 1ns;
 logic[7:0] Aval, Bval, Din;
 logic[15:0] result, correct_ans;
 logic[4:0] debug;
+logic[7:0] debug2, debug3, debug4;
 logic Clk = 0;
 logic Reset, ClearA_LoadB, Execute, X, AhexL, AhexU, BhexL, BhexU;
 
@@ -23,6 +24,9 @@ Processor proc(.Clk,
 					.Aval,
 					.Bval,
 					.debug,
+					.debug2,
+					.debug3,
+					.debug4,
                .AhexL(), 
 					.AhexU(),
 					.BhexL(),

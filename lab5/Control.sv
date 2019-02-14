@@ -1,7 +1,7 @@
 //Two-always example for state machine
 
 module control (input  logic Clk, Reset, ClearA_LoadB, Execute, M0,
-                output logic Shift_En, Ld_A, Ld_B, fn, ClearA, 
+                output logic Shift_En, Ld_X, Ld_A, Ld_B, fn, ClearA, 
 					 output logic[4:0] debug);
 
     // Declare signals curr_state, next_state of type enum
@@ -58,6 +58,7 @@ begin
 					 ClearA <= ClearA_LoadB;
 					 Ld_A <= 1'b0;
 					 Ld_B <= ClearA_LoadB;
+					 Ld_X <= 1'b0;
 					 Shift_En <= 1'b0;
 				end
 
@@ -65,6 +66,7 @@ begin
 		      begin
                 fn <= 1'b0;				
                 Ld_A <= 1'b0;
+					 Ld_X <= 1'b0;
                 Ld_B <= 1'b0;
 					 ClearA <= 1'b0;
                 Shift_En <= 1'b0;
@@ -73,6 +75,7 @@ begin
 				A0,A1,A2,A3,A4,A5,A6:
 				begin
 					 Ld_A <= M0;
+					 Ld_X <= M0;
 					 Ld_B <= 1'b0;
 					 Shift_En <= 1'b0;
 					 fn <= 1'b0;
@@ -82,6 +85,7 @@ begin
 				SUB7:   //last operation, sub instead of add
 				begin
 					 fn <= 1'b1;
+					 Ld_X <= M0;
 					 Ld_A <= M0;
 					 Ld_B <= 1'b0;
 					 Shift_En <= 1'b0;
@@ -91,10 +95,11 @@ begin
 	   	   S0,S1,S2,S3,S4,S5,S6,S7:  //all other cases, just shift
 		      begin 
 					 fn <= 1'b0;
-				    Ld_A = 1'b0;
-                Ld_B = 1'b0;
-                Shift_En = 1'b1;
-					 ClearA = 1'b0;
+					 Ld_X <= 1'b0;
+				    Ld_A <= 1'b0;
+                Ld_B <= 1'b0;
+                Shift_En <= 1'b1;
+					 ClearA <= 1'b0;
 		      end
         endcase
     end

@@ -11,6 +11,8 @@ module Processor (input logic   Clk,     // Internal
                                 Execute, // Push button 3
                   input  logic [7:0]  Din,     // input data
 				      output logic [4:0] debug,
+						output logic [7:0] debug2,
+						output logic [7:0] debug3, debug4,
 						output logic  X,	
                   output logic [7:0]  Aval,    // DEBUG
                                       Bval,   
@@ -21,37 +23,46 @@ module Processor (input logic   Clk,     // Internal
 
 	 //local logic variables go here
 	 logic Reset_SH, ClearA_LoadB_SH, Execute_SH;
-	 logic Ld_A, Ld_B, A_0, B_0, Shift_En, Clear_A;
+	 logic Ld_A, Ld_B, Ld_X, A_0, B_0, Shift_En, Clear_A;
 	 logic [7:0] A, B, Din_S;
-	 logic [8:0] Result;
-	 logic fn;  // fn = 1 for sub; fn = 0 for add	 
+	 logic [7:0] Result;
+	 logic fn;  // fn = 1 for sub; fn = 0 for add
+	 logic X_new;
 	 
+	 //assign X = Xval;
 	 assign Aval = A;
 	 assign Bval = B;
+	 assign debug3 = Result;
 	 
 	 //Instantiation of modules here
 	 register_unit    reg_unit (
                         .Clk,
                         .Reset(Reset_SH),
                         .Ld_A,
+								.Ld_X,
                         .Ld_B,
 								.Clear_A,
                         .Shift_En,
-                        .Din_A(Result[7:0]),
+                        .Din_A(Result),
 								.Din_B(Din_S),
+								.X_new(X_new),
+								.X_prev(X),
                         .A_In(X),
                         .B_In(A_0),
                         .A_out(A_0),
                         .B_out(B_0),  //B_0 is M
                         .A(A),
-                        .B(B));
+                        .B(B),
+								.X(X),
+								.debug4(debug4));
 								
 	 ADD_SUB9		compute(
 								.A,
 								.S(Din_S),   // S is value of switches
-								.fn,
-								.Result,
-								.X);
+								.fn(fn),
+								.Result(Result),
+								.debug2,
+								.X_new(X_new));
 
 	 control          control_unit (
                         .Clk,
@@ -61,8 +72,9 @@ module Processor (input logic   Clk,     // Internal
 								.M0(B_0),
                         .Shift_En,
                         .Ld_A,
+								.Ld_X,
                         .Ld_B,
-								.fn,
+								.fn(fn),
 							   .ClearA(Clear_A),
 								.debug);
 	 HexDriver        HexAL (

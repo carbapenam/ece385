@@ -1,8 +1,10 @@
 module reg_8 (input  logic Clk, Reset, Shift_In, Load, Shift_En,
               input  logic [7:0]  D,
+			//	  output logic [7:0]  debug5,
               output logic Shift_Out,
               output logic [7:0]  Data_Out);
 
+	// assign debug5 = D;
     always_ff @ (posedge Clk)
     begin
 	 	 if (Reset) //notice, this is a sycnrhonous reset, which is recommended on the FPGA
