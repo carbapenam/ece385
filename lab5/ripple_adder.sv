@@ -26,13 +26,13 @@ module ADD_SUB9
 );
 
 	logic c4, c8;
-	logic[7:0]			SS; //internal S or NOT(S)
+	logic[7:0] SS; //internal S or NOT(S)
 	logic A8, SS8;
 	
 	assign SS = (S ^ {8{fn}});  //when fn = 1, complement S
 	assign A8 = A[7];   //sign extension bit
 	assign SS8 = SS[7];
-	ra4 RA0(.A(A[3:0]), .B(SS[3:0]), .Sum(Result[3:0]), .Cin(1'b0), .Co(c4));
+	ra4 RA0(.A(A[3:0]), .B(SS[3:0]), .Sum(Result[3:0]), .Cin(fn), .Co(c4));
 	ra4 RA4(.A(A[7:4]), .B(SS[7:4]), .Sum(Result[7:4]), .Cin(c4), .Co(c8));
 	full_adder FA(.x(A8), .y(SS8), .z(c8), .s(Result[8]), .c());
 	assign X = Result[8];
