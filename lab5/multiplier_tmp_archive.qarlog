@@ -1,0 +1,30 @@
+Quartus Prime Archive log --	C:/Users/low/Desktop/school/ece385/lab5/multiplier_tmp_archive.qarlog
+
+Archive:	C:/Users/low/Desktop/school/ece385/lab5/multiplier_tmp_archive.qar
+Date:		Thu Feb 14 17:53:45 2019
+Quartus Prime		18.1.0 Build 625 09/12/2018 SJ Lite Edition
+
+	=========== Files Selected: ===========
+C:/Users/low/Desktop/school/ece385/lab5/Control.sv
+C:/Users/low/Desktop/school/ece385/lab5/HexDriver.sv
+C:/Users/low/Desktop/school/ece385/lab5/Processor.sv
+C:/Users/low/Desktop/school/ece385/lab5/Reg_4.sv
+C:/Users/low/Desktop/school/ece385/lab5/Register_unit.sv
+C:/Users/low/Desktop/school/ece385/lab5/Synchronizers.sv
+C:/Users/low/Desktop/school/ece385/lab5/full_adder.sv
+C:/Users/low/Desktop/school/ece385/lab5/labdemo_testbench.sv
+C:/Users/low/Desktop/school/ece385/lab5/multiplier.qpf
+C:/Users/low/Desktop/school/ece385/lab5/multiplier.qsf
+C:/Users/low/Desktop/school/ece385/lab5/multiplier_assignment_defaults.qdf
+C:/Users/low/Desktop/school/ece385/lab5/ripple_adder.sv
+C:/Users/low/Desktop/school/ece385/lab5/testbench.sv
+	======= Total: 13 files to archive =======
+
+	================ Status: ===============
+All files archived successfully.
+
+
+******* Archived project restoration attempt on Thu Feb 14 17:53:47 2019
+Source archive file:	C:/Users/low/Desktop/school/ece385/lab5/multiplier_tmp_archive.qar
+Archive was extracted into	G:/ECE385/Lab5_ABO_Thursday/hchun5_swang250/
+		 - successfully.
