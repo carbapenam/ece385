@@ -1,4 +1,4 @@
-module reg_16 (input  logic Clk, Reset, Load,
+module reg_16 (input logic Clk, Load
               input  logic [15:0]  Data_In,
               output logic [15:0]  Data_Out);
 

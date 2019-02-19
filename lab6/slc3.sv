@@ -44,6 +44,7 @@ logic MIO_EN;
 logic [15:0] MDR_In;
 logic [15:0] MAR, MDR, IR, PC;
 logic [15:0] Data_from_SRAM, Data_to_SRAM;
+logic [15:0] Bus;
 
 // Signals being displayed on hex display
 logic [3:0][3:0] hex_4;
