@@ -1,5 +1,5 @@
 module mux2
-	#(parameter width = 8)
+	#(parameter width = 16)
 		(input logic [width-1:0] D0, D1,
 		 input logic S,
 		 output logic [width-1:0] Data_Out);
@@ -13,7 +13,7 @@ module mux2
 endmodule
 
 module mux4
-	#(parameter width = 8)
+	#(parameter width = 16)
 		(input logic [width-1:0] D0, D1, D2, D3,
 		 input logic [1:0] S,
 		 output logic [width-1:0] Data_Out);
@@ -33,7 +33,7 @@ module mux4
 endmodule
 
 module mux8
-	#(parameter width = 8)
+	#(parameter width = 16)
 		(input logic [width-1:0] D0, D1, D2, D3, D4, D5, D6, D7,
 		 input logic [2:0] S,
 		 output logic [width-1:0] Data_Out);
@@ -58,4 +58,25 @@ module mux8
 				endcase
 		end
 		
+endmodule
+
+module mux_gate
+	#(parameter width = 16)
+		(input logic [width-1:0] D_MARMUX, D_PC, D_ALU, D_MDR, Bus,
+		 input logic [3:0] S,
+		 output logic [width-1:0] Data_Out);
+	always_comb begin
+		case (S)
+			4'b1000:
+				Data_Out = D_MARMUX;
+			4'b0100:
+				Data_Out = D_PC;
+			4'b0010:
+				Data_Out = D_ALU;
+			4'b0001:
+				Data_Out = D_MDR;
+			default:
+				Data_Out = Bus;
+			endcase
+		end
 endmodule
