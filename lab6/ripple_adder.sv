@@ -39,7 +39,7 @@ module ripple_adder
      * Feel free to create sub-modules or other files. */
 	  
 	 logic c4, c8, c12;
-	 ra4 RA0(.A(A[3:0]), .B(B[3:0]), .Sum(Sum[3:0]), .Cin(0), .Co(c4));
+	 ra4 RA0(.A(A[3:0]), .B(B[3:0]), .Sum(Sum[3:0]), .Cin(1'b0), .Co(c4));
 	 ra4 RA4(.A(A[7:4]), .B(B[7:4]), .Sum(Sum[7:4]), .Cin(c4), .Co(c8));
 	 ra4 RA8(.A(A[11:8]), .B(B[11:8]), .Sum(Sum[11:8]), .Cin(c8), .Co(c12));
 	 ra4 RA12(.A(A[15:12]), .B(B[15:12]), .Sum(Sum[15:12]), .Cin(c12), .Co(Co));
