@@ -12,28 +12,7 @@ logic CE, UB, LB, OE, WE;
 logic [19:0] ADDR;
 wire [15:0] Data;
 
-lab6_toplevel lab6(
-		.S,
-		.Clk,
-		.Reset,
-		.Run,
-		.Continue,
-		.LED,
-		.HEX0,
-		.HEX1,
-		.HEX2,
-		.HEX3,
-		.HEX4,
-		.HEX5,
-		.HEX6,
-		.HEX7,
-		.CE,
-		.UB,
-		.LB,
-		.OE,
-		.WE,
-		.ADDR,
-		.Data);
+lab6_toplevel lab6(.*);
 		
 always begin: CLOCK_GENERATION
 #1 Clk = ~Clk;
@@ -43,17 +22,18 @@ initial begin: CLOCK_INITIALIZATION
 Clk = 1;
 end
 
-
-
 initial begin: TEST_VECTORS
+Reset = 0;
+Continue = 1;
+Run = 1;
+#4
+Reset = 1;
+#8
 
 Run = 0;
 #4
-
 Run = 1;
-Continue = 1;
-#30
-
+#90
 
 Continue = 0;
 #4
