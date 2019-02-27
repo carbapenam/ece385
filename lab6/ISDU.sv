@@ -63,7 +63,20 @@ module ISDU (   input logic         Clk,
 						S_33_2, 
 						S_35, 
 						S_32, 
-						S_01}   State, Next_state;   // Internal state logic
+						S_01,
+						S_05,
+						S_06,
+						S_07,
+						S_09,
+						S_00,
+						S_04,
+						S_12,
+						S_25,
+						S_27,
+						S_23,
+						S_16,
+						S_21,
+						S_22}   State, Next_state;   // Internal state logic
 		
 	always_ff @ (posedge Clk)
 	begin
@@ -284,7 +297,7 @@ module ISDU (   input logic         Clk,
 				begin
 					//MIO_EN? 
 					LD_MDR = 1'b1;
-					MEM_OE = 1'b0; //OE is enabled
+					Mem_OE = 1'b0; //OE is enabled
 				end
 			
 			S_27 : //LDR   DR <- MDR
@@ -311,7 +324,7 @@ module ISDU (   input logic         Clk,
 			
 			S_16 :   //STR  M[MAR] <- MDR
 				begin
-					MEM_WE = 1'b0; //enable write
+					Mem_WE = 1'b0; //enable write
 				end				
 			
 			S_04 :   //JSR  R7 <- PC
