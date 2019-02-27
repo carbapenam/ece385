@@ -206,7 +206,7 @@ module ISDU (   input logic         Clk,
 				Next_state = S_18;
 				
 			S_00 :
-				if (1) // not sure what is 1/0
+				if (BEN) // when BEN = 1 go to state 22
 					Next_state = S_22;
 				else 
 					Next_state = S_18;
@@ -284,6 +284,7 @@ module ISDU (   input logic         Clk,
 				begin
 					//MIO_EN? 
 					LD_MDR = 1'b1;
+					MEM_OE = 1'b0; //OE is enabled
 				end
 			
 			S_27 : //LDR   DR <- MDR
@@ -310,7 +311,7 @@ module ISDU (   input logic         Clk,
 			
 			S_16 :   //STR  M[MAR] <- MDR
 				begin
-					//incomplete
+					MEM_WE = 1'b0; //enable write
 				end				
 			
 			S_04 :   //JSR  R7 <- PC
@@ -338,7 +339,8 @@ module ISDU (   input logic         Clk,
 				
 			S_00 :
 				begin
-					//incomplete
+					LD_BEN = 1'b1; //load BEN
+				
 				end
 				
 			S_22 :  //PC <- PCoffset9
