@@ -63,7 +63,20 @@ module ISDU (   input logic         Clk,
 						S_33_2, 
 						S_35, 
 						S_32, 
-						S_01}   State, Next_state;   // Internal state logic
+						S_01,
+						S_05,
+						S_06,
+						S_07,
+						S_09,
+						S_00,
+						S_04,
+						S_12,
+						S_25,
+						S_27,
+						S_23,
+						S_16,
+						S_21,
+						S_22}   State, Next_state;   // Internal state logic
 		
 	always_ff @ (posedge Clk)
 	begin
@@ -138,6 +151,26 @@ module ISDU (   input logic         Clk,
 						Next_state = S_01;
 
 					// You need to finish the rest of opcodes.....
+					4'b0101 :
+						Next_state = S_05;
+						
+					4'b1001 :
+						Next_state = S_09;
+						
+					4'b0110 :
+						Next_state = S_06;
+						
+					4'b0111 :
+						Next_state = S_07;
+						
+					4'b0100 :
+						Next_state = S_04;
+						
+					4'b1100 :
+						Next_state = S_12;
+						
+					4'b0000 :
+						Next_state = S_00;
 
 					default : 
 						Next_state = S_18;
@@ -146,7 +179,53 @@ module ISDU (   input logic         Clk,
 				Next_state = S_18;
 
 			// You need to finish the rest of states.....
+			S_05 :
+				Next_state = S_18;
+				
+			S_09 :
+				Next_state = S_18;
 
+			S_12 :
+				Next_state = S_18;
+			
+			S_06 :
+				Next_state = S_25;
+			
+			S_25 : 
+				if (Run)
+					Next_state = S_27;
+				else
+					Next_state = S_25;
+			
+			S_27 :
+				Next_state = S_18;
+		
+			S_07 :
+				Next_state = S_23;
+
+			S_23 :
+				Next_state = S_16;
+			
+			S_16 :
+				if (Run)
+					Next_state = S_18;
+				else
+					Next_state = S_16;
+					
+			S_04 :
+				Next_state = S_21;
+			
+			S_21 :
+				Next_state = S_18;
+				
+			S_00 :
+				if (BEN) // when BEN = 1 go to state 22
+					Next_state = S_22;
+				else 
+					Next_state = S_18;
+					
+			S_22 :
+				Next_state = S_18;
 			default : ;
 
 		endcase
@@ -177,17 +256,113 @@ module ISDU (   input logic         Clk,
 			PauseIR2: ;
 			S_32 : 
 				LD_BEN = 1'b1;
-			S_01 : 
+			S_01 : // ADD
 				begin 
 					SR2MUX = IR_5;
 					ALUK = 2'b00;
 					GateALU = 1'b1;
 					LD_REG = 1'b1;
 					// incomplete...
+					DRMUX = 1'b0;
 				end
 
 			// You need to finish the rest of states.....
-
+			S_05 : //AND
+				begin
+					SR2MUX = IR_5;
+					ALUK = 2'b01;  //assume 01 for AND operation
+					GateALU = 1'b1;
+					LD_REG = 1'b1;
+					DRMUX = 1'b0;
+				end
+				
+			S_09 : //NOT
+				begin
+					SR2MUX = 1'b1;
+					ALUK = 2'b10;  //assume 10 for NOT operation
+					GateALU = 1'b1;
+					LD_REG = 1'b1;
+					DRMUX = 1'b0;
+				end
+				
+			S_06 : //LDR  MAR <- B + off6
+				begin
+					GateMARMUX = 1'b1;
+					SR1MUX = 1'b1;  //SR = IR[8:6]
+					SR2MUX = 1'b1;
+					LD_MAR = 1'b1;
+					
+				end
+			S_25 :   //LDR  MDR <- M[MAR]
+				begin
+					//MIO_EN? 
+					LD_MDR = 1'b1;
+					Mem_OE = 1'b0; //OE is enabled
+				end
+			
+			S_27 : //LDR   DR <- MDR
+				begin
+					GateMDR = 1'b1;
+					LD_REG = 1'b1;
+					DRMUX = 1'b0;
+				end
+			S_07 : //STR  MAR <- B + off6
+				begin
+					GateMARMUX = 1'b1;
+					SR1MUX = 1'b1;  //SR = IR[8:6]
+					SR2MUX = 1'b1;
+					LD_MAR = 1'b1;
+					
+				end
+			S_23 :   //STR  MDR <- SR
+				begin
+					//MIO_EN? 
+					LD_MDR = 1'b1;
+					
+					
+				end
+			
+			S_16 :   //STR  M[MAR] <- MDR
+				begin
+					Mem_WE = 1'b0; //enable write
+				end				
+			
+			S_04 :   //JSR  R7 <- PC
+				begin
+					DRMUX = 1'b1; //DR = R7
+					GatePC = 1'b1;
+				end
+				
+			S_21 :   //JSR  PC <- PC + offset
+				begin
+					LD_PC = 1'b1;
+					PCMUX = 2'b10; //select adder
+					ADDR1MUX = 1'b0; //select pc
+					ADDR2MUX = 2'b11; //select offset11
+				end
+				
+			S_12 :  //JMP  PC <- BaseR
+				begin
+					LD_PC = 1'b1;
+					PCMUX = 2'b10; //select adder
+					ADDR1MUX = 1'b1; //select register
+					ADDR2MUX = 2'b00; //select 0
+					SR1MUX = 1'b1; // IR[8:6]
+				end
+				
+			S_00 :
+				begin
+					LD_BEN = 1'b1; //load BEN
+				
+				end
+				
+			S_22 :  //PC <- PCoffset9
+				begin
+					LD_PC = 1'b1;
+					PCMUX = 2'b10; //select adder
+					ADDR1MUX = 1'b0; //select pc
+					ADDR2MUX = 2'b10; //select offset9	
+				end
 			default : ;
 		endcase
 	end 
