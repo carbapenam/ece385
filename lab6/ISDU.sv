@@ -272,11 +272,82 @@ module ISDU (   input logic         Clk,
 					DRMUX = 1'b0;
 				end
 				
-			S_06 : //LDR
+			S_06 : //LDR  MAR <- B + off6
 				begin
+					GateMARMUX = 1'b1;
+					SR1MUX = 1'b1;  //SR = IR[8:6]
+					SR2MUX = 1'b1;
+					LD_MAR = 1'b1;
 					
 				end
-
+			S_25 :   //LDR  MDR <- M[MAR]
+				begin
+					//MIO_EN? 
+					LD_MDR = 1'b1;
+				end
+			
+			S_27 : //LDR   DR <- MDR
+				begin
+					GateMDR = 1'b1;
+					LD_REG = 1'b1;
+					DRMUX = 1'b0;
+				end
+			S_07 : //STR  MAR <- B + off6
+				begin
+					GateMARMUX = 1'b1;
+					SR1MUX = 1'b1;  //SR = IR[8:6]
+					SR2MUX = 1'b1;
+					LD_MAR = 1'b1;
+					
+				end
+			S_23 :   //STR  MDR <- SR
+				begin
+					//MIO_EN? 
+					LD_MDR = 1'b1;
+					
+					
+				end
+			
+			S_16 :   //STR  M[MAR] <- MDR
+				begin
+					//incomplete
+				end				
+			
+			S_04 :   //JSR  R7 <- PC
+				begin
+					DRMUX = 1'b1; //DR = R7
+					GatePC = 1'b1;
+				end
+				
+			S_21 :   //JSR  PC <- PC + offset
+				begin
+					LD_PC = 1'b1;
+					PCMUX = 2'b10; //select adder
+					ADDR1MUX = 1'b0; //select pc
+					ADDR2MUX = 2'b11; //select offset11
+				end
+				
+			S_12 :  //JMP  PC <- BaseR
+				begin
+					LD_PC = 1'b1;
+					PCMUX = 2'b10; //select adder
+					ADDR1MUX = 1'b1; //select register
+					ADDR2MUX = 2'b00; //select 0
+					SR1MUX = 1'b1; // IR[8:6]
+				end
+				
+			S_00 :
+				begin
+					//incomplete
+				end
+				
+			S_22 :  //PC <- PCoffset9
+				begin
+					LD_PC = 1'b1;
+					PCMUX = 2'b10; //select adder
+					ADDR1MUX = 1'b0; //select pc
+					ADDR2MUX = 2'b10; //select offset9	
+				end
 			default : ;
 		endcase
 	end 
