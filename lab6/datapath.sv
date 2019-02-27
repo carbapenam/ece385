@@ -23,26 +23,33 @@ logic [15:0] Modified_Address;
 logic [15:0] PC_Plus_1, MUX_PC_Out;
 logic [15:0] MUX_ADDR1_Out, MUX_ADDR2_Out;
 
-//
+// Variables for top right datapath
+logic [15:0] MUX_DR_Out, MUX_SR1_Out, MUX_SR2_Out;
+logic [15:0] SR1_Out, SR2_Out;
+logic [15:0] ALU_Out;
 
-//logic [15:0] ALU_Out;
+// Variables for middle branching section
+
+logic [2:0] REG_NZP_Out;
+logic REG_BEN_Out;
 
 // Variables for bottom datapath
 
 logic [15:0] MUX_MDR_Out;
 
+
 logic [15:0] Bus;
 
-reg_16 REG_MDR(.Clk, .Load(LD_MDR), .Data_In(MDR_MUX_Out), .Data_Out(MDR));
+register #(16) REG_MDR(.Clk, .Load(LD_MDR), .Data_In(MUX_MDR_Out), .Data_Out(MDR));
 mux2 #(16) MUX_MDR(.D0(Bus), .D1(MDR_In), .Data_Out(MUX_MDR_Out), .S(MIO_EN));
 
-reg_16 REG_MAR(.Clk, .Load(LD_MAR), .Data_In(Bus), .Data_Out(MAR));
+register #(16) REG_MAR(.Clk, .Load(LD_MAR), .Data_In(Bus), .Data_Out(MAR));
 
-reg_16 REG_IR(.Clk, .Load(LD_IR), .Data_In(Bus), .Data_Out(IR));
+register #(16) REG_IR(.Clk, .Load(LD_IR), .Data_In(Bus), .Data_Out(IR));
 
-reg_16 REG_PC(.Clk, .Load(LD_PC), .Data_In(PC_MUX_Out), .Data_Out(PC));
+register #(16) REG_PC(.Clk, .Load(LD_PC), .Data_In(MUX_PC_Out), .Data_Out(PC));
 mux4 #(16) MUX_PC(.D0(PC_Plus_1), 
-                  .D1(/* Modified_Address */), 
+                  .D1(Modified_Address ), 
 						.D2(Bus),
 						.D3(16'h0001),
 						.S(PCMUX),
@@ -64,16 +71,61 @@ mux2 #(16) MUX_ADDR1(.D0(PC),
 							.Data_Out(MUX_ADDR1_Out)
 							);
 							
-ripple_adder MARMUX_ADDER (.A(MUX_ADDR1_Out), 
+ripple_adder ADDER_MARMUX (.A(MUX_ADDR1_Out), 
                            .B(MUX_ADDR2_Out),
 									.Sum(Modified_Address), 
 									.Co()
 								  );
-								  
 
+//Components for right side of datapath								  
+
+mux2 #(16) MUX_DR(.D0(3'b111),
+                  .D1(IR[11:9]),
+					   .S(DRMUX),
+					   .Data_Out(MUX_DR_Out)
+					  );
+								  
+reg_file REG_FILE(.DR(MUX_DR_Out),
+                  .SR1(MUX_SR1_Out),
+						.SR2(SR2MUX),
+						.Data_In(Bus),
+                  .SR1_Out, 
+						.SR2_Out,
+						.Clk,
+						.LD_REG);
+						
+mux2 #(16) MUX_SR2(.D0({ {5{IR[11]}}, IR[4:0]}),
+                   .D1(SR2_Out),
+	                .S(SR2MUX),
+	                .Data_Out(MUX_SR2_Out)
+	               );
+						
+alu ALU(.B(MUX_SR2_Out),
+        .A(SR1_Out),
+		  .ALUK,
+		  .Data_Out(ALU_Out)
+		 );
+		 
+// Center branching section
+
+register #(3) REG_NZP(.Data_In({(Bus[15] == 1'b0),
+                                (Bus[15:0] == 16'h0000),
+										  (Bus[15] == 1'b1)}), 
+							 .Load (LD_CC),
+							 .Clk,
+							 .Data_Out(REG_NZP_Out)
+							 );
+							 
+register #(3) REG_BEN(.Data_In(Bus[11:9] && REG_NZP_Out), 
+							 .Load (LD_BEN),
+							 .Clk,
+							 .Data_Out(REG_BEN_Out)
+							 );
+							 
+		 
 mux_gate #(16) GATE (.D_MARMUX(Modified_Address),
                      .D_PC(PC),
-					      .D_ALU(/*ALU_Out*/),
+					      .D_ALU(ALU_Out),
 					      .D_MDR(MDR),
 					      .Bus(Bus),
 					      .S({GateMARMUX, GatePC, GateALU, GateMDR}),
