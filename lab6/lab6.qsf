@@ -184,6 +184,19 @@ set_location_assignment PIN_AC4 -to UB
 set_location_assignment PIN_AD4 -to LB
 set_location_assignment PIN_AD5 -to OE
 set_location_assignment PIN_AE8 -to WE
+set_global_assignment -name EDA_TEST_BENCH_ENABLE_STATUS TEST_BENCH_MODE -section_id eda_simulation
+set_global_assignment -name EDA_NATIVELINK_SIMULATION_TEST_BENCH testbench -section_id eda_simulation
+set_global_assignment -name EDA_TEST_BENCH_NAME testbench -section_id eda_simulation
+set_global_assignment -name EDA_DESIGN_INSTANCE_NAME NA -section_id testbench
+set_global_assignment -name EDA_TEST_BENCH_MODULE_NAME testbench -section_id testbench
+set_global_assignment -name EDA_TEST_BENCH_RUN_SIM_FOR "4200 ns" -section_id testbench
+set_global_assignment -name EDA_TEST_BENCH_NAME test_memory -section_id eda_simulation
+set_global_assignment -name EDA_DESIGN_INSTANCE_NAME NA -section_id test_memory
+set_global_assignment -name EDA_TEST_BENCH_RUN_SIM_FOR "6900 ns" -section_id test_memory
+set_global_assignment -name EDA_TEST_BENCH_MODULE_NAME test_memory -section_id test_memory
+set_global_assignment -name EDA_TEST_BENCH_FILE testbench.sv -section_id testbench
+set_global_assignment -name EDA_TEST_BENCH_FILE test_memory.sv -section_id test_memory
+set_global_assignment -name SYSTEMVERILOG_FILE Synchronizers.sv
 set_global_assignment -name SYSTEMVERILOG_FILE testbench.sv
 set_global_assignment -name SYSTEMVERILOG_FILE HexDriver.sv
 set_global_assignment -name SYSTEMVERILOG_FILE ripple_adder.sv
@@ -198,18 +211,6 @@ set_global_assignment -name SYSTEMVERILOG_FILE memory_contents.sv
 set_global_assignment -name SYSTEMVERILOG_FILE Mem2IO.sv
 set_global_assignment -name SYSTEMVERILOG_FILE lab6_toplevel.sv
 set_global_assignment -name SYSTEMVERILOG_FILE ISDU.sv
-set_global_assignment -name EDA_TEST_BENCH_ENABLE_STATUS TEST_BENCH_MODE -section_id eda_simulation
-set_global_assignment -name EDA_NATIVELINK_SIMULATION_TEST_BENCH testbench -section_id eda_simulation
-set_global_assignment -name EDA_TEST_BENCH_NAME testbench -section_id eda_simulation
-set_global_assignment -name EDA_DESIGN_INSTANCE_NAME NA -section_id testbench
-set_global_assignment -name EDA_TEST_BENCH_MODULE_NAME testbench -section_id testbench
-set_global_assignment -name EDA_TEST_BENCH_RUN_SIM_FOR "4200 ns" -section_id testbench
-set_global_assignment -name EDA_TEST_BENCH_NAME test_memory -section_id eda_simulation
-set_global_assignment -name EDA_DESIGN_INSTANCE_NAME NA -section_id test_memory
-set_global_assignment -name EDA_TEST_BENCH_RUN_SIM_FOR "6900 ns" -section_id test_memory
-set_global_assignment -name EDA_TEST_BENCH_MODULE_NAME test_memory -section_id test_memory
-set_global_assignment -name EDA_TEST_BENCH_FILE testbench.sv -section_id testbench
-set_global_assignment -name EDA_TEST_BENCH_FILE test_memory.sv -section_id test_memory
 set_global_assignment -name SYSTEMVERILOG_FILE reg_file.sv
 set_global_assignment -name SYSTEMVERILOG_FILE demux8.sv
 set_global_assignment -name SYSTEMVERILOG_FILE alu.sv

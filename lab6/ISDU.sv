@@ -83,6 +83,10 @@ module ISDU (   input logic         Clk,
 						S_22}   State, Next_state;   // Internal state logic
 
 	logic Mem_OE_S, Mem_WE_S;	
+	
+	
+	sync sync1(Clk, Mem_OE_S, Mem_OE);
+	sync sync2(Clk, Mem_WE_S, Mem_WE);
 
 	always_ff @ (posedge Clk)
 	begin
@@ -92,7 +96,7 @@ module ISDU (   input logic         Clk,
 			State <= Next_state;
 	end
    
-	always_ff @ (posedge Clk)
+	always_comb
 	begin 
 		// Default next state is staying at current state
 		Next_state = State;
@@ -251,7 +255,7 @@ module ISDU (   input logic         Clk,
 					LD_PC = 1'b1;
 				end
 			S_33_1 : 
-				Mem_OE = 1'b0;
+				Mem_OE_S = 1'b0;
 			S_33_2 : 
 				begin 
 					Mem_OE_S = 1'b0;
@@ -264,16 +268,18 @@ module ISDU (   input logic         Clk,
 				end
 			PauseIR1: ;
 			PauseIR2: ;
-			S_32 : 
-				LD_BEN = 1'b1;
+			S_32 :
+				begin
+					LD_BEN = 1'b1;
+				end
 			S_01 : // ADD
 				begin 
 					SR2MUX = IR_5;
 					ALUK = 2'b00;
 					GateALU = 1'b1;
 					LD_REG = 1'b1;
-					// incomplete...
 					DRMUX = 1'b0;
+					LD_CC = 1'b1;
 				end
 
 			// You need to finish the rest of states.....
@@ -284,6 +290,7 @@ module ISDU (   input logic         Clk,
 					GateALU = 1'b1;
 					LD_REG = 1'b1;
 					DRMUX = 1'b0;
+					LD_CC = 1'b1;
 				end
 				
 			S_09 : //NOT
@@ -293,6 +300,7 @@ module ISDU (   input logic         Clk,
 					GateALU = 1'b1;
 					LD_REG = 1'b1;
 					DRMUX = 1'b0;
+					LD_CC = 1'b1;
 				end
 				
 			S_06 : //LDR  MAR <- B + off6
@@ -318,6 +326,7 @@ module ISDU (   input logic         Clk,
 					GateMDR = 1'b1;
 					LD_REG = 1'b1;
 					DRMUX = 1'b0;
+					LD_CC = 1'b1;
 				end
 			S_07 : //STR  MAR <- B + off6
 				begin
@@ -391,8 +400,6 @@ module ISDU (   input logic         Clk,
 	assign Mem_UB = 1'b0;
 	assign Mem_LB = 1'b0;
 	
-	//sync sync1(Clk, Mem_OE_S, Mem_OE);
-	//sync sync2(Clk, Mem_WE_S, Mem_WE);
 		
 	
 endmodule

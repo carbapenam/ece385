@@ -31,24 +31,17 @@ Run = 1;
 Reset = 1;
 #8
 
+S = 16'h0003;
+#4
+
 Run = 0;
 #4
 Run = 1;
 #90
-
-Continue = 0;
-#4
-Continue = 1;
-#20
-
-Continue = 0;
-#4
-Continue = 1;
-#20
-
-Continue = 0;
-#4
-Continue = 1;
+S = 16'h0420;
+#90
+S = 16'hFFFF;
 end
+
 
 endmodule

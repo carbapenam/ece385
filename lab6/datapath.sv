@@ -4,7 +4,7 @@ input logic Clk,
 input logic Reset,
 
 /* From the state tachine */
-input logic BEN,
+output logic BEN,
 input logic LD_MAR, LD_MDR, LD_IR, LD_BEN, LD_CC, LD_REG, LD_PC, LD_LED,
 input logic GatePC, GateMDR, GateALU, GateMARMUX,
 input logic [1:0] PCMUX, ADDR2MUX, ALUK,
@@ -20,7 +20,7 @@ output logic [15:0] MAR, MDR, IR, PC
 // Variables for top left datapath
 
 logic [15:0] Modified_Address;
-logic [15:0] PC_Plus_1, MUX_PC_Out;
+logic [15:0] PC_Plus_1, PC_Plus_1_Synced, MUX_PC_Out;
 logic [15:0] MUX_ADDR1_Out, MUX_ADDR2_Out;
 
 // Variables for top right datapath
@@ -32,7 +32,7 @@ logic [15:0] ALU_Out;
 // Variables for middle branching section
 
 logic [2:0] REG_NZP_Out;
-logic REG_BEN_Out;
+logic test;
 
 // Variables for bottom datapath
 
@@ -49,7 +49,7 @@ register #(16) REG_MAR(.Clk, .Load(LD_MAR), .Data_In(Bus), .Data_Out(MAR), .REG_
 register #(16) REG_IR(.Clk, .Load(LD_IR), .Data_In(Bus), .Data_Out(IR), .REG_Reset);
 
 register #(16) REG_PC(.Clk, .Load(LD_PC), .Data_In(MUX_PC_Out), .Data_Out(PC), .REG_Reset);
-mux4 #(16) MUX_PC(.D0(PC_Plus_1), 
+mux4 #(16) MUX_PC(.D0(PC_Plus_1_Synced), 
                   .D1(Modified_Address), 
 						.D2(Bus),
 						.D3(16'h0001),
@@ -57,6 +57,8 @@ mux4 #(16) MUX_PC(.D0(PC_Plus_1),
 						.Data_Out(MUX_PC_Out));
 
 ripple_adder PC_ADDER (.A(PC), .B(16'h0001),. Sum(PC_Plus_1), .Co());
+sync16 SYNC_PC_ADDER(Clk, PC_Plus_1, PC_Plus_1_Synced);
+
 
 mux4 #(16) MUX_ADDR2(.D0(16'h0000), 
                      .D1({ {10{IR[5]}}, IR[5:0]}),
@@ -125,11 +127,13 @@ register #(3) REG_NZP(.Data_In({(Bus[15] == 1'b0),
 							 .Data_Out(REG_NZP_Out),
 							 .REG_Reset
 							 );
+
+assign test = ((IR[11] & REG_NZP_Out[2]) | (IR[10] & REG_NZP_Out[1]) | (IR[9] & REG_NZP_Out[0]));
 							 
-register #(1) REG_BEN(.Data_In(Bus[11:9] && REG_NZP_Out), 
+reg1 REG_BEN(.Data_In(test), 
 							 .Load (LD_BEN),
 							 .Clk,
-							 .Data_Out(REG_BEN_Out),
+							 .Data_Out(BEN),
 							 .REG_Reset
 							 );
 							 

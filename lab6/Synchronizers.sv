@@ -13,6 +13,19 @@ end
 
 endmodule
 
+module sync16 (
+   input               Clk,
+	input  logic [15:0] d, 
+	output logic [15:0] q
+);
+
+always_ff @ (posedge Clk)
+begin
+	q <= d;
+end
+
+endmodule
+
 
 //synchronizer with reset to 0 (d_ff)
 module sync_r0 (

@@ -13,3 +13,18 @@ module register
 	
 
 endmodule
+
+module reg1
+
+(input logic Clk, Load, REG_Reset,
+ input  logic Data_In,
+ output logic Data_Out);
+
+    always_ff @ (posedge Clk)
+    begin
+		if (Load) Data_Out <= Data_In;
+		else if (REG_Reset) Data_Out <= 1'b0;
+    end
+	
+
+endmodule
