@@ -1,6 +1,7 @@
 module datapath(
 /* From the toplevel */
 input logic Clk,
+input logic Reset,
 
 /* From the state tachine */
 input logic BEN,
@@ -9,13 +10,12 @@ input logic GatePC, GateMDR, GateALU, GateMARMUX,
 input logic [1:0] PCMUX, ADDR2MUX, ALUK,
 input logic DRMUX, SR1MUX, SR2MUX, ADDR1MUX,
 input logic MIO_EN,
+input logic REG_Reset,
 
 /* From MEM2IO */
 input logic [15:0] MDR_In, /* Alias for Data_from_CPU */
-
 output logic [15:0] MAR, MDR, IR, PC
 );
-
 
 // Variables for top left datapath
 
@@ -41,16 +41,16 @@ logic [15:0] MUX_MDR_Out;
 
 logic [15:0] Bus;
 
-register #(16) REG_MDR(.Clk, .Load(LD_MDR), .Data_In(MUX_MDR_Out), .Data_Out(MDR));
+register #(16) REG_MDR(.Clk, .Load(LD_MDR), .Data_In(MUX_MDR_Out), .Data_Out(MDR), .REG_Reset);
 mux2 #(16) MUX_MDR(.D0(Bus), .D1(MDR_In), .Data_Out(MUX_MDR_Out), .S(MIO_EN));
 
-register #(16) REG_MAR(.Clk, .Load(LD_MAR), .Data_In(Bus), .Data_Out(MAR));
+register #(16) REG_MAR(.Clk, .Load(LD_MAR), .Data_In(Bus), .Data_Out(MAR), .REG_Reset);
 
-register #(16) REG_IR(.Clk, .Load(LD_IR), .Data_In(Bus), .Data_Out(IR));
+register #(16) REG_IR(.Clk, .Load(LD_IR), .Data_In(Bus), .Data_Out(IR), .REG_Reset);
 
-register #(16) REG_PC(.Clk, .Load(LD_PC), .Data_In(MUX_PC_Out), .Data_Out(PC));
+register #(16) REG_PC(.Clk, .Load(LD_PC), .Data_In(MUX_PC_Out), .Data_Out(PC), .REG_Reset);
 mux4 #(16) MUX_PC(.D0(PC_Plus_1), 
-                  .D1(Modified_Address ), 
+                  .D1(Modified_Address), 
 						.D2(Bus),
 						.D3(16'h0001),
 						.S(PCMUX),
@@ -100,7 +100,8 @@ reg_file REG_FILE(.DR(MUX_DR_Out),
                   .SR1_Out, 
 						.SR2_Out,
 						.Clk,
-						.LD_REG);
+						.LD_REG,
+						.REG_Reset);
 						
 mux2 #(16) MUX_SR2(.D0(SR2_Out),
                    .D1({ {11{IR[4]}}, IR[4:0]}),
@@ -121,13 +122,15 @@ register #(3) REG_NZP(.Data_In({(Bus[15] == 1'b0),
 										  (Bus[15] == 1'b1)}), 
 							 .Load (LD_CC),
 							 .Clk,
-							 .Data_Out(REG_NZP_Out)
+							 .Data_Out(REG_NZP_Out),
+							 .REG_Reset
 							 );
 							 
 register #(1) REG_BEN(.Data_In(Bus[11:9] && REG_NZP_Out), 
 							 .Load (LD_BEN),
 							 .Clk,
-							 .Data_Out(REG_BEN_Out)
+							 .Data_Out(REG_BEN_Out),
+							 .REG_Reset
 							 );
 							 
 		 
@@ -137,6 +140,7 @@ mux_gate #(16) GATE (.D_MARMUX(Modified_Address),
 					      .D_MDR(MDR),
 					      .Bus(Bus),
 					      .S({GateMARMUX, GatePC, GateALU, GateMDR}),
-					      .Data_Out(Bus));
+							.Data_Out(Bus));
 
+							
 endmodule

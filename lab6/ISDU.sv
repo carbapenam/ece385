@@ -52,7 +52,9 @@ module ISDU (   input logic         Clk,
 									Mem_UB,
 									Mem_LB,
 									Mem_OE,
-									Mem_WE
+									Mem_WE,
+									
+				output logic REG_Reset
 				);
 
 	enum logic [4:0] {  Halted, 
@@ -121,6 +123,8 @@ module ISDU (   input logic         Clk,
 		 
 		Mem_OE_S = 1'b1;
 		Mem_WE_S = 1'b1;
+		
+		REG_Reset = 1'b0;
 	
 		// Assign next state
 		unique case (State)
@@ -199,11 +203,8 @@ module ISDU (   input logic         Clk,
 				Next_state = S_25_2;
 				
 			S_25_2 : 
-				if (Run)
-					Next_state = S_27;
-				else
-					Next_state = S_25_2;
-			
+				Next_state = S_27;
+				
 			S_27 :
 				Next_state = S_18;
 		
@@ -217,11 +218,7 @@ module ISDU (   input logic         Clk,
 				Next_state = S_16_2;
 			
 			S_16_2 :
-				if (Run)
-					Next_state = S_18;
-				else
-					Next_state = S_16_2;
-					
+				Next_state = S_18;			
 			S_04 :
 				Next_state = S_21;
 			
@@ -242,7 +239,10 @@ module ISDU (   input logic         Clk,
 		
 		// Assign control signals based on current state
 		case (State)
-			Halted: ;
+			Halted: 
+				begin
+					REG_Reset = 1'b1;
+				end
 			S_18 : 
 				begin 
 					GatePC = 1'b1;
@@ -391,8 +391,8 @@ module ISDU (   input logic         Clk,
 	assign Mem_UB = 1'b0;
 	assign Mem_LB = 1'b0;
 	
-	sync sync1(Clk, Mem_OE_S, Mem_OE);
-	sync sync2(Clk, Mem_WE_S, Mem_WE);
+	//sync sync1(Clk, Mem_OE_S, Mem_OE);
+	//sync sync2(Clk, Mem_WE_S, Mem_WE);
 		
 	
 endmodule

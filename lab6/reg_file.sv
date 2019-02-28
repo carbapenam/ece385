@@ -1,6 +1,6 @@
 module reg_file
 (input logic [2:0] DR, SR2, SR1,
- input logic LD_REG, Clk,
+ input logic LD_REG, Clk, REG_Reset,
  input logic [15:0] Data_In,
  output logic [15:0] SR1_Out, SR2_Out
 );
@@ -19,14 +19,14 @@ demux8 MUX_REG(.D0(LD0),
 					.S(DR),
 					.Data_In(LD_REG));
 
-register #(16) R0 (.Clk, .Load(LD0), .Data_In, .Data_Out(R0_Out));					
-register #(16) R1 (.Clk, .Load(LD1), .Data_In, .Data_Out(R1_Out));
-register #(16) R2 (.Clk, .Load(LD2), .Data_In, .Data_Out(R2_Out));
-register #(16) R3 (.Clk, .Load(LD3), .Data_In, .Data_Out(R3_Out));
-register #(16) R4 (.Clk, .Load(LD4), .Data_In, .Data_Out(R4_Out));
-register #(16) R5 (.Clk, .Load(LD5), .Data_In, .Data_Out(R5_Out));
-register #(16) R6 (.Clk, .Load(LD6), .Data_In, .Data_Out(R6_Out));
-register #(16) R7 (.Clk, .Load(LD7), .Data_In, .Data_Out(R7_Out));
+register #(16) R0 (.Clk, .Load(LD0), .Data_In, .Data_Out(R0_Out), .REG_Reset);					
+register #(16) R1 (.Clk, .Load(LD1), .Data_In, .Data_Out(R1_Out), .REG_Reset);
+register #(16) R2 (.Clk, .Load(LD2), .Data_In, .Data_Out(R2_Out), .REG_Reset);
+register #(16) R3 (.Clk, .Load(LD3), .Data_In, .Data_Out(R3_Out), .REG_Reset);
+register #(16) R4 (.Clk, .Load(LD4), .Data_In, .Data_Out(R4_Out), .REG_Reset);
+register #(16) R5 (.Clk, .Load(LD5), .Data_In, .Data_Out(R5_Out), .REG_Reset);
+register #(16) R6 (.Clk, .Load(LD6), .Data_In, .Data_Out(R6_Out), .REG_Reset);
+register #(16) R7 (.Clk, .Load(LD7), .Data_In, .Data_Out(R7_Out), .REG_Reset);
 
 mux8 #(16) MUX_SR2(.D0(R0_Out),
                    .D1(R1_Out),

@@ -12,6 +12,7 @@ logic CE, UB, LB, OE, WE;
 logic [19:0] ADDR;
 wire [15:0] Data;
 
+
 lab6_toplevel lab6(.*);
 		
 always begin: CLOCK_GENERATION
