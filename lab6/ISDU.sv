@@ -278,7 +278,7 @@ module ISDU (   input logic         Clk,
 				
 			S_09 : //NOT
 				begin
-					SR2MUX = 1'b1;
+					//SR2MUX = 1'b1;
 					ALUK = 2'b10;  //assume 10 for NOT operation
 					GateALU = 1'b1;
 					LD_REG = 1'b1;
@@ -289,10 +289,11 @@ module ISDU (   input logic         Clk,
 				begin
 					GateMARMUX = 1'b1;
 					SR1MUX = 1'b1;  //SR = IR[8:6]
-					SR2MUX = 1'b1;
 					LD_MAR = 1'b1;
-					
+					ADDR1MUX = 1'b1;
+					ADDR2MUX = 2'b01; //offset 6
 				end
+				
 			S_25 :   //LDR  MDR <- M[MAR]
 				begin
 					//MIO_EN? 
@@ -309,16 +310,19 @@ module ISDU (   input logic         Clk,
 			S_07 : //STR  MAR <- B + off6
 				begin
 					GateMARMUX = 1'b1;
-					SR1MUX = 1'b1;  //SR = IR[8:6]
-					SR2MUX = 1'b1;
 					LD_MAR = 1'b1;
+					ADDR1MUX = 1'b1;
+					ADDR2MUX = 2'b01;
 					
 				end
 			S_23 :   //STR  MDR <- SR
 				begin
-					//MIO_EN? 
+					//MIO_EN = 0
+				   Mem_OE = 1'b1;	
 					LD_MDR = 1'b1;
-					
+					SR1MUX = 1'b0;  //SR = IR[11:9]
+					ALUK = 2'b11;  //passA
+					GateALU = 1'b1;		
 					
 				end
 			
@@ -331,12 +335,13 @@ module ISDU (   input logic         Clk,
 				begin
 					DRMUX = 1'b1; //DR = R7
 					GatePC = 1'b1;
+					LD_REG = 1'b1;
 				end
 				
-			S_21 :   //JSR  PC <- PC + offset
+			S_21 :   //JSR  PC <- PC + offset11
 				begin
 					LD_PC = 1'b1;
-					PCMUX = 2'b10; //select adder
+					PCMUX = 2'b01; //select adder
 					ADDR1MUX = 1'b0; //select pc
 					ADDR2MUX = 2'b11; //select offset11
 				end
@@ -344,7 +349,7 @@ module ISDU (   input logic         Clk,
 			S_12 :  //JMP  PC <- BaseR
 				begin
 					LD_PC = 1'b1;
-					PCMUX = 2'b10; //select adder
+					PCMUX = 2'b01; //select adder
 					ADDR1MUX = 1'b1; //select register
 					ADDR2MUX = 2'b00; //select 0
 					SR1MUX = 1'b1; // IR[8:6]
@@ -352,14 +357,13 @@ module ISDU (   input logic         Clk,
 				
 			S_00 :
 				begin
-					LD_BEN = 1'b1; //load BEN
-				
+
 				end
 				
-			S_22 :  //PC <- PCoffset9
+			S_22 :  //PC <- PC + PCoffset9
 				begin
 					LD_PC = 1'b1;
-					PCMUX = 2'b10; //select adder
+					PCMUX = 2'b01; //select adder
 					ADDR1MUX = 1'b0; //select pc
 					ADDR2MUX = 2'b10; //select offset9	
 				end

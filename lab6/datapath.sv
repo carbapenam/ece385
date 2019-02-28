@@ -94,8 +94,8 @@ reg_file REG_FILE(.DR(MUX_DR_Out),
 						.Clk,
 						.LD_REG);
 						
-mux2 #(16) MUX_SR2(.D0({ {5{IR[11]}}, IR[4:0]}),
-                   .D1(SR2_Out),
+mux2 #(16) MUX_SR2(.D0(SR2_Out),
+                   .D1({ {11{IR[4]}}, IR[4:0]}),
 	                .S(SR2MUX),
 	                .Data_Out(MUX_SR2_Out)
 	               );
