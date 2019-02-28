@@ -24,7 +24,8 @@ logic [15:0] PC_Plus_1, MUX_PC_Out;
 logic [15:0] MUX_ADDR1_Out, MUX_ADDR2_Out;
 
 // Variables for top right datapath
-logic [15:0] MUX_DR_Out, MUX_SR1_Out, MUX_SR2_Out;
+logic [2:0] MUX_DR_Out, MUX_SR1_Out; 
+logic [15:0] MUX_SR2_Out;
 logic [15:0] SR1_Out, SR2_Out;
 logic [15:0] ALU_Out;
 
@@ -79,15 +80,22 @@ ripple_adder ADDER_MARMUX (.A(MUX_ADDR1_Out),
 
 //Components for right side of datapath								  
 
-mux2 #(16) MUX_DR(.D0(3'b111),
+mux2 #(3) MUX_DR(.D0(3'b111),
                   .D1(IR[11:9]),
 					   .S(DRMUX),
 					   .Data_Out(MUX_DR_Out)
 					  );
-								  
+					  
+mux2 #(3) MUX_SR1(.D0(IR[11:9]),
+                  .D1(IR[8:6]),
+					   .S(SR1MUX),
+					   .Data_Out(MUX_SR1_Out)
+					  );
+
+					  
 reg_file REG_FILE(.DR(MUX_DR_Out),
                   .SR1(MUX_SR1_Out),
-						.SR2(SR2MUX),
+						.SR2(IR[2:0]),
 						.Data_In(Bus),
                   .SR1_Out, 
 						.SR2_Out,
@@ -116,7 +124,7 @@ register #(3) REG_NZP(.Data_In({(Bus[15] == 1'b0),
 							 .Data_Out(REG_NZP_Out)
 							 );
 							 
-register #(3) REG_BEN(.Data_In(Bus[11:9] && REG_NZP_Out), 
+register #(1) REG_BEN(.Data_In(Bus[11:9] && REG_NZP_Out), 
 							 .Load (LD_BEN),
 							 .Clk,
 							 .Data_Out(REG_BEN_Out)
