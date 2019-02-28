@@ -16,6 +16,9 @@
 //    spring 2018 Distribution
 //
 //------------------------------------------------------------------------------
+`include "SLC3_2.sv"
+import SLC3_2::*;
+
 module slc3(
     input logic [15:0] S,
     input logic Clk, Reset, Run, Continue,
@@ -23,6 +26,7 @@ module slc3(
     output logic [6:0] HEX0, HEX1, HEX2, HEX3, HEX4, HEX5, HEX6, HEX7,
     output logic CE, UB, LB, OE, WE,
     output logic [19:0] ADDR,
+	// output logic [15:0] PCval, IRval,
     inout wire [15:0] Data //tristate buffers need to be of type wire
 );
 
@@ -42,8 +46,11 @@ logic DRMUX, SR1MUX, SR2MUX, ADDR1MUX;
 logic MIO_EN;
 
 logic [15:0] MDR_In;
-logic [15:0] MAR, MDR, IR, PC;
+logic [15:0] MAR, MDR, PC, IR;
 logic [15:0] Data_from_SRAM, Data_to_SRAM;
+
+//assign PCval = PC;
+//assign IRval = IR;
 
 // Signals being displayed on hex display
 logic [3:0][3:0] hex_4;
