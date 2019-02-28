@@ -37,7 +37,7 @@ module  Mem2IO ( 	input logic Clk, Reset,
 	always_ff @ (posedge Clk) begin 
 		if (Reset) 
 			hex_data <= 16'd0;
-		else if ( ~WE & (ADDR[15:0] == 16'hFFFF) ) 
+		else if ( ~WE /*& (ADDR[15:0] == 16'hFFFF)*/ ) 
 			hex_data <= Data_from_CPU;
     end
        

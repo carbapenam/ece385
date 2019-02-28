@@ -25,21 +25,29 @@ end
 
 initial begin: TEST_VECTORS
 Reset = 0;
-Continue = 1;
+Continue = 0;
 Run = 1;
 #4
 Reset = 1;
 #8
 
-S = 16'h0003;
+S = 16'h0006;
 #4
 
 Run = 0;
 #4
 Run = 1;
-#90
+#50
+Continue = 1;
+#20
+Continue = 0;
+#50
 S = 16'h0420;
-#90
+#50
+Continue = 1;
+#20
+Continue = 0;
+#50
 S = 16'hFFFF;
 end
 

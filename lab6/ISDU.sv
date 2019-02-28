@@ -58,6 +58,7 @@ module ISDU (   input logic         Clk,
 				);
 
 	enum logic [4:0] {  Halted, 
+						Pause,
 						PauseIR1, 
 						PauseIR2, 
 						S_18, 
@@ -85,6 +86,7 @@ module ISDU (   input logic         Clk,
 						S_16_2,
 						S_16_3,
 						S_16_4,
+						S_16_5,
 						S_21,
 						S_22}   State, Next_state;   // Internal state logic
 
@@ -140,7 +142,12 @@ module ISDU (   input logic         Clk,
 		unique case (State)
 			Halted : 
 				if (Run) 
-					Next_state = S_18;                      
+					Next_state = S_18;
+			Pause :
+				if (Continue)
+					Next_state = S_18;
+				else
+					Next_state = Pause;
 			S_18 : 
 				Next_state = S_33_1;
 			// Any states involving SRAM require more than one clock cycles.
@@ -193,6 +200,8 @@ module ISDU (   input logic         Clk,
 						
 					4'b0000 :
 						Next_state = S_00;
+					4'b1101 :
+						Next_state = Pause;
 
 					default : 
 						Next_state = S_18;
@@ -242,8 +251,10 @@ module ISDU (   input logic         Clk,
 				
 			S_16_3:
 				Next_state = S_16_4;
+			S_16_4:
+				Next_state = S_16_5;
 			
-			S_16_4 :
+			S_16_5 :
 				Next_state = S_18;			
 			S_04 :
 				Next_state = S_21;
@@ -384,9 +395,11 @@ module ISDU (   input logic         Clk,
 					Mem_WE_S = 1'b0;
 			S_16_3:
 					Mem_WE_S = 1'b0;
+			S_16_4:
+					Mem_WE_S = 1'b0;
 					
 			
-			S_16_4:   //STR  M[MAR] <- MDR
+			S_16_5:   //STR  M[MAR] <- MDR
 				begin
 					Mem_WE_S = 1'b0; //enable write
 				end				
