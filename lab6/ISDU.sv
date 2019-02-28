@@ -63,6 +63,8 @@ module ISDU (   input logic         Clk,
 						S_18, 
 						S_33_1, 
 						S_33_2, 
+						S_33_3,
+						S_33_4,
 						S_35, 
 						S_32, 
 						S_01,
@@ -141,7 +143,11 @@ module ISDU (   input logic         Clk,
 			// The exact number will be discussed in lecture.
 			S_33_1 : 
 				Next_state = S_33_2;
-			S_33_2 : 
+			S_33_2 :
+				Next_state = S_33_3;
+			S_33_3 :
+				Next_state = S_33_4;
+			S_33_4 : 
 				Next_state = S_35;
 			S_35 : 
 				Next_state = S_32;
@@ -257,6 +263,10 @@ module ISDU (   input logic         Clk,
 			S_33_1 : 
 				Mem_OE_S = 1'b0;
 			S_33_2 : 
+				Mem_OE_S = 1'b0;
+			S_33_3 : 
+				Mem_OE_S = 1'b0;
+			S_33_4 : 
 				begin 
 					Mem_OE_S = 1'b0;
 					LD_MDR = 1'b1;
