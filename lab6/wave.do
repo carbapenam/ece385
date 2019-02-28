@@ -33,9 +33,15 @@ add wave -noupdate -radix hexadecimal /testbench/lab6/my_slc/d0/Bus
 add wave -noupdate -radix hexadecimal /testbench/lab6/my_slc/d0/REG_NZP_Out
 add wave -noupdate -radix hexadecimal /testbench/lab6/my_slc/d0/LD_BEN
 add wave -noupdate -radix hexadecimal /testbench/lab6/my_slc/d0/LD_CC
+add wave -noupdate -radix hexadecimal /testbench/lab6/my_slc/d0/LD_MAR
+add wave -noupdate -radix hexadecimal /testbench/lab6/my_slc/d0/LD_MDR
 add wave -noupdate -radix hexadecimal /testbench/lab6/my_slc/d0/test
 add wave -noupdate -radix hexadecimal /testbench/lab6/my_slc/state_controller/BEN
 add wave -noupdate -radix hexadecimal /testbench/lab6/my_slc/state_controller/State
+add wave -noupdate -radix hexadecimal /testbench/lab6/my_slc/memory_subsystem/Data_from_CPU 
+add wave -noupdate -radix hexadecimal /testbench/lab6/my_slc/memory_subsystem/Data_from_SRAM 
+add wave -noupdate -radix hexadecimal /testbench/lab6/my_slc/memory_subsystem/Data_to_CPU 
+add wave -noupdate -radix hexadecimal /testbench/lab6/my_slc/memory_subsystem/Data_to_SRAM 
 TreeUpdate [SetDefaultTree]
 WaveRestoreCursors {{Cursor 1} {0 ns} 0}
 quietly wave cursor active 1

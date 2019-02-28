@@ -24,18 +24,14 @@ module  Mem2IO ( 	input logic Clk, Reset,
 	logic [15:0] hex_data;
    
 	// Load data from switches when address is xFFFF, and from SRAM otherwise.
-	always_comb
-    begin 
+   always_ff @ (posedge Clk) begin 
         Data_to_CPU = 16'd0;
         if (WE && ~OE) 
 			if (ADDR[15:0] == 16'hFFFF) 
-				Data_to_CPU = Switches;
+				Data_to_CPU <= Switches;
 			else 
-				Data_to_CPU = Data_from_SRAM;
+				Data_to_CPU <= Data_from_SRAM;
     end
-
-    // Pass data from CPU to SRAM
-	assign Data_to_SRAM = Data_from_CPU;
 
 	// Write to LEDs when WE is active and address is xFFFF.
 	always_ff @ (posedge Clk) begin 
@@ -49,5 +45,8 @@ module  Mem2IO ( 	input logic Clk, Reset,
 	assign HEX1 = hex_data[7:4];
 	assign HEX2 = hex_data[11:8];
 	assign HEX3 = hex_data[15:12];
+
+    // Pass data from CPU to SRAM
+	assign Data_to_SRAM = Data_from_CPU;
 
 endmodule
