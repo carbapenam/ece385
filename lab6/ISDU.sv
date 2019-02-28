@@ -79,7 +79,9 @@ module ISDU (   input logic         Clk,
 						S_16_2,
 						S_21,
 						S_22}   State, Next_state;   // Internal state logic
-		
+
+	logic Mem_OE_S, Mem_WE_S;	
+
 	always_ff @ (posedge Clk)
 	begin
 		if (Reset) 
@@ -88,7 +90,7 @@ module ISDU (   input logic         Clk,
 			State <= Next_state;
 	end
    
-	always_comb
+	always_ff @ (posedge Clk)
 	begin 
 		// Default next state is staying at current state
 		Next_state = State;
@@ -117,8 +119,8 @@ module ISDU (   input logic         Clk,
 		ADDR1MUX = 1'b0;
 		ADDR2MUX = 2'b00;
 		 
-		Mem_OE = 1'b1;
-		Mem_WE = 1'b1;
+		Mem_OE_S = 1'b1;
+		Mem_WE_S = 1'b1;
 	
 		// Assign next state
 		unique case (State)
@@ -252,7 +254,7 @@ module ISDU (   input logic         Clk,
 				Mem_OE = 1'b0;
 			S_33_2 : 
 				begin 
-					Mem_OE = 1'b0;
+					Mem_OE_S = 1'b0;
 					LD_MDR = 1'b1;
 				end
 			S_35 : 
@@ -303,12 +305,12 @@ module ISDU (   input logic         Clk,
 				end
 				
 			S_25_1:
-					Mem_OE = 1'b0;
+					Mem_OE_S = 1'b0;
 			S_25_2 :   //LDR  MDR <- M[MAR]
 				begin
 					//MIO_EN? 
 					LD_MDR = 1'b1;
-					Mem_OE = 1'b0; //OE is enabled
+					Mem_OE_S = 1'b0; //OE is enabled
 				end
 			
 			S_27 : //LDR   DR <- MDR
@@ -329,7 +331,7 @@ module ISDU (   input logic         Clk,
 			S_23 :   //STR  MDR <- SR
 				begin
 					//MIO_EN = 0
-				   Mem_OE = 1'b1;	
+				   Mem_OE_S = 1'b1;	
 					LD_MDR = 1'b1;
 					SR1MUX = 1'b0;  //SR = IR[11:9]
 					ALUK = 2'b11;  //passA
@@ -338,10 +340,10 @@ module ISDU (   input logic         Clk,
 				end
 			
 			S_16_1:
-					Mem_WE = 1'b0;
+					Mem_WE_S = 1'b0;
 			S_16_2:   //STR  M[MAR] <- MDR
 				begin
-					Mem_WE = 1'b0; //enable write
+					Mem_WE_S = 1'b0; //enable write
 				end				
 			
 			S_04 :   //JSR  R7 <- PC
@@ -388,5 +390,9 @@ module ISDU (   input logic         Clk,
 	assign Mem_CE = 1'b0;
 	assign Mem_UB = 1'b0;
 	assign Mem_LB = 1'b0;
+	
+	sync sync1(Clk, Mem_OE_S, Mem_OE);
+	sync sync2(Clk, Mem_WE_S, Mem_WE);
+		
 	
 endmodule
