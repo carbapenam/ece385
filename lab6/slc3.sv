@@ -50,6 +50,7 @@ logic [15:0] MDR_In;
 logic [15:0] MAR, MDR, PC, IR;
 logic [15:0] Data_from_SRAM, Data_to_SRAM;
 
+
 //assign PCval = PC;
 //assign IRval = IR;
 
