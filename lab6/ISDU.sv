@@ -77,10 +77,14 @@ module ISDU (   input logic         Clk,
 						S_12,
 						S_25_1,
 						S_25_2,
+						S_25_3,
+						S_25_4,
 						S_27,
 						S_23,
 						S_16_1,
 						S_16_2,
+						S_16_3,
+						S_16_4,
 						S_21,
 						S_22}   State, Next_state;   // Internal state logic
 
@@ -212,7 +216,13 @@ module ISDU (   input logic         Clk,
 			S_25_1 :
 				Next_state = S_25_2;
 				
-			S_25_2 : 
+			S_25_2 :
+				Next_state = S_25_3;
+				
+			S_25_3 :
+				Next_state = S_25_4;
+				
+			S_25_4 : 
 				Next_state = S_27;
 				
 			S_27 :
@@ -226,8 +236,14 @@ module ISDU (   input logic         Clk,
 				
 			S_16_1:
 				Next_state = S_16_2;
+				
+			S_16_2:
+				Next_state = S_16_3;
+				
+			S_16_3:
+				Next_state = S_16_4;
 			
-			S_16_2 :
+			S_16_4 :
 				Next_state = S_18;			
 			S_04 :
 				Next_state = S_21;
@@ -324,7 +340,11 @@ module ISDU (   input logic         Clk,
 				
 			S_25_1:
 					Mem_OE_S = 1'b0;
-			S_25_2 :   //LDR  MDR <- M[MAR]
+			S_25_2:
+					Mem_OE_S = 1'b0;		
+			S_25_3:
+					Mem_OE_S = 1'b0;
+			S_25_4 :   //LDR  MDR <- M[MAR]
 				begin
 					//MIO_EN? 
 					LD_MDR = 1'b1;
@@ -360,7 +380,13 @@ module ISDU (   input logic         Clk,
 			
 			S_16_1:
 					Mem_WE_S = 1'b0;
-			S_16_2:   //STR  M[MAR] <- MDR
+			S_16_2:
+					Mem_WE_S = 1'b0;
+			S_16_3:
+					Mem_WE_S = 1'b0;
+					
+			
+			S_16_4:   //STR  M[MAR] <- MDR
 				begin
 					Mem_WE_S = 1'b0; //enable write
 				end				
