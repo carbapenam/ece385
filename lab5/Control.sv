@@ -103,9 +103,19 @@ begin
 					 ClearA <= 1'b0;
 				end
 				
-	   	   S0,S1,S2,S3,S4,S5,S6,S7:  //all other cases, just shift
+	   	   S0,S1,S2,S3,S4,S5,S6:  //all other cases, just shift
 		      begin 
 					 fn <= 1'b0;
+					 Ld_X <= 1'b0;
+				    Ld_A <= 1'b0;
+                Ld_B <= 1'b0;
+                Shift_En <= 1'b1;
+					 ClearA <= 1'b0;
+		      end
+				
+				S7:
+		      begin 
+					 fn <= 1'b1;
 					 Ld_X <= 1'b0;
 				    Ld_A <= 1'b0;
                 Ld_B <= 1'b0;

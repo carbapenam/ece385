@@ -27,7 +27,7 @@ module Processor (input logic   Clk,     // Internal
 	 logic [7:0] A, B, Din_S;
 	 logic [7:0] Result;
 	 logic fn;  // fn = 1 for sub; fn = 0 for add
-	 logic X_new;
+
 	 
 	 //assign X = Xval;
 	 assign Aval = A;
@@ -45,15 +45,12 @@ module Processor (input logic   Clk,     // Internal
                         .Shift_En,
                         .Din_A(Result),
 								.Din_B(Din_S),
-								.X_new(X_new),
-								.X_prev(X),
                         .A_In(X),
                         .B_In(A_0),
                         .A_out(A_0),
                         .B_out(B_0),  //B_0 is M
                         .A(A),
                         .B(B),
-								.X(X),
 								.debug4(debug4));
 								
 	 ADD_SUB9		compute(
@@ -62,7 +59,7 @@ module Processor (input logic   Clk,     // Internal
 								.fn(fn),
 								.Result(Result),
 								.debug2,
-								.X_new(X_new));
+								.X(X));
 
 	 control          control_unit (
                         .Clk,

@@ -2,11 +2,8 @@ module register_unit (input  logic Clk, Reset, A_In, B_In, Ld_A, Ld_B,
 									 Clear_A, Shift_En, Ld_X,
                       input  logic [7:0]  Din_A,
 							 input  logic [7:0]	Din_B, 
-							 input  logic		X_new,
-							 input  logic     X_prev,
                       output logic A_out, B_out, 
                       output logic [7:0]  A,
-							 output logic  	X,
 							 output logic [7:0]  debug4,
                       output logic [7:0]  B);
 							 
@@ -20,13 +17,6 @@ always_ff @ (negedge Clk)
 		Modified_A <= Din_A;
 	end
 
-always_ff @ (negedge Clk)  
-   begin
-	if (Ld_X)
-		X <= X_new;
-	else 
-		X <= X_prev;
-	end
 
 	assign debug4 = Modified_A;
 	
