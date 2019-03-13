@@ -19,10 +19,10 @@ begin
     if(Reset)
     begin
         from_sw_data_out_buffer <= 16'b0;
-        OTG_ADDR                <= 16'b0;
+        OTG_ADDR                <= 2'b0;
         OTG_RD_N                <= 1;
         OTG_WR_N                <= 1;
-        OTG_CS_N                <= 0;
+        OTG_CS_N                <= 1;
         OTG_RST_N               <= 1;
         from_sw_data_in         <= 16'b0;
     end
@@ -42,6 +42,6 @@ end
 // Look at tristate.sv in lab 6 for an example.
 
 //need modification
-assign OTG_DATA = OTG_WR_N ? from_sw_data_out_buffer : {16{1'bZ}};
+assign OTG_DATA = (~from_sw_w) ? from_sw_data_out_buffer : {16{1'bZ}};
 
 endmodule 

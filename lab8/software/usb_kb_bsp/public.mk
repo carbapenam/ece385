@@ -90,7 +90,7 @@ JDI_FILE := $(ABS_BSP_ROOT_DIR)/../../lab8.jdi
 
 # Qsys--generated SOPCINFO file. Required for resolving node instance ID's with 
 # design component names. 
-SOPCINFO_FILE := $(ABS_BSP_ROOT_DIR)/../../lab8_soc.sopcinfo
+SOPCINFO_FILE := $(ABS_BSP_ROOT_DIR)/../../nios_system.sopcinfo
 
 # Big-Endian operation. 
 # setting BIG_ENDIAN is false
@@ -143,8 +143,8 @@ QSYS := 1
 ELF_PATCH_FLAG += --qsys true
 
 # Design Name 
-# setting SOPC_NAME is lab8_soc
-SOPC_NAME := lab8_soc
+# setting SOPC_NAME is nios_system
+SOPC_NAME := nios_system
 
 # SopcBuilder Simulation Enabled 
 # setting SOPC_SIMULATION_ENABLED is false
@@ -161,9 +161,9 @@ SOPC_SYSID_FLAG += --sidp=0xb0
 ELF_PATCH_FLAG  += --sidp 0xb0
 
 # The SOPC Timestamp 
-# setting SOPC_TIMESTAMP is 1552272293
-SOPC_SYSID_FLAG += --timestamp=1552272293
-ELF_PATCH_FLAG  += --timestamp 1552272293
+# setting SOPC_TIMESTAMP is 1552505033
+SOPC_SYSID_FLAG += --timestamp=1552505033
+ELF_PATCH_FLAG  += --timestamp 1552505033
 
 # Enable JTAG UART driver to recover when host is inactive causing buffer to 
 # full without returning error. Printf will not fail with this recovery. none 

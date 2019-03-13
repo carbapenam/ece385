@@ -78,38 +78,46 @@ module  ball ( input         Clk,                // 50 MHz clock
             //   both sides of the operator as UNSIGNED numbers.
             // e.g. Ball_Y_Pos - Ball_Size <= Ball_Y_Min 
             // If Ball_Y_Pos is 0, then Ball_Y_Pos - Ball_Size will not be -4, but rather a large positive number.
+
+
+				//when button is pressed
+				unique case (keycode)
+					8'd26:
+					begin
+						Ball_X_Motion_in = Ball_X_Step;
+						Ball_Y_Motion_in = 10'd0;
+					end
+					8'd16:
+					begin
+						Ball_X_Motion_in = 10'd0;
+						Ball_Y_Motion_in = (~(Ball_Y_Step) + 1'b1);
+					end
+					8'd22:
+					begin
+						Ball_X_Motion_in = (~(Ball_X_Step) + 1'b1);
+						Ball_Y_Motion_in = 10'd0;
+					end
+					8'd7:
+					begin
+						Ball_X_Motion_in = 10'd0;
+						Ball_Y_Motion_in = Ball_Y_Step;
+					end
+					default: 
+						;
+				endcase 
+
+				//boundary situations
             if( Ball_Y_Pos + Ball_Size >= Ball_Y_Max )  // Ball is at the bottom edge, BOUNCE!
                 Ball_Y_Motion_in = (~(Ball_Y_Step) + 1'b1);  // 2's complement.  
             else if ( Ball_Y_Pos <= Ball_Y_Min + Ball_Size )  // Ball is at the top edge, BOUNCE!
                 Ball_Y_Motion_in = Ball_Y_Step;
             // TODO: Add other boundary detections and handle keypress here.
-				if( BALL_X_Pos + Ball_Size >= Ball_X_Max )
+				if( Ball_X_Pos + Ball_Size >= Ball_X_Max )
                 Ball_X_Motion_in = (~(Ball_X_Step) + 1'b1);  // 2's complement.  
             else if ( Ball_X_Pos <= Ball_X_Min + Ball_Size )  // Ball is at the left edge, BOUNCE!
                 Ball_X_Motion_in = Ball_X_Step;					 
         
-				unique case (keycode[2])
-					26:
-					begin
-						Ball_X_Motion = Ball_X_Step;
-						Ball_Y_Motion = 10'b0;
-					end
-					16:
-					begin
-						Ball_X_Motion = 10'b0;
-						Ball_Y_Motion = /// -1 ;
-					end
-					22:
-					begin
-						Ball_X_Motion = /// -1;
-						Ball_Y_Motion = 10'b0;
-					end
-					7:
-					begin
-						Ball_X_Motion = 10'b0;
-						Ball_Y_Motion = Ball_Y_Step;
-					end
-				endcase
+ 
 				
         
             // Update the ball's position with its motion

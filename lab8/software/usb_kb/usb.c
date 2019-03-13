@@ -60,7 +60,7 @@ void UsbWrite(alt_u16 Address, alt_u16 Data)
 alt_u16 UsbRead(alt_u16 Address)
 {
 	IO_write(HPI_ADDR, Address);
-	return IO_Read(HPI_DATA);
+	return IO_read(HPI_DATA);
 }
 
 
