@@ -41,7 +41,7 @@ end
 // OTG_DATA should be high Z (tristated) when NIOS is not writing to OTG_DATA inout bus.
 // Look at tristate.sv in lab 6 for an example.
 
-//need to be changed
-assign OTG_DATA = (check if writing to OTg) ? from_sw_data_out_buffer : {16{1'bZ}};
+//need modification
+assign OTG_DATA = OTG_WR_N ? from_sw_data_out_buffer : {16{1'bZ}};
 
 endmodule 
