@@ -17,7 +17,12 @@ unsigned int RotWord(unsigned int n);
 void KeyExpansion(unsigned char * key, unsigned int * w, int Nk);
 void AddRoundKey(unsigned char * state, unsigned int * RoundKey);
 void ShiftRows(uint *in);
+void SubWord(uint *in);
 void SubBytes(uint *in);
+uchar xchar(uchar in);
+void MixColumns(unsigned char *state);
+
+#define THREE_TIMES(in) xtime(in) ^ in
 
 // Pointer to base address of AES module, make sure it matches Qsys
 volatile unsigned int * AES_PTR = (unsigned int *) 0x00000100;
@@ -256,4 +261,69 @@ void SubBytes(uint *in)
         //Merge them 
         in[row] = subbed[0] | (subbed[1] << 8) | (subbed[2] << 16) | (subbed[3] << 24);  
     }
+}
+
+void SubWord(uint *in)
+{
+    uchar original[4] = {0,0,0,0};
+    uchar subbed[4] = {0,0,0,0};
+    
+    //Split a 32bits int to 4 X 8bits.
+    uint mask = 0;
+    for (int byte = 0; byte < 4; byte++)
+    {
+        mask = 0xFF << (8 * byte);
+        original[byte] = (mask & in[row]) >> (8 * byte);
+    }
+    
+    //Sub them
+    for (int byte = 0; byte < 4; byte++)
+    {
+        subbed[byte] = aes_sbox[original[byte]];            
+    }
+
+    //Merge them 
+    in = subbed[0] | (subbed[1] << 8) | (subbed[2] << 16) | (subbed[3] << 24);
+}
+
+
+uchar xtimes(uchar in)
+{
+   uchar temp = in << 1;
+   temp = (in>>7 == 1) ? temp ^ 0x1b : temp;
+   return temp;   
+}
+
+void MixColumns(unsigned char *state)
+{
+    uchar original[4] = {0,0,0,0};
+    uchar mixed_column[4] = {0,0,0,0};
+    uint temp[4] = {0, 0, 0, 0}; 
+    uint mask = 0;
+    
+    for (int col = 3; col > -1; col--)
+    {
+        for (int row = 0; row < 4; row++)
+        {
+            //Split the columns
+            mask = 0xFF << (8 * col);
+            original[row] = (mask & state[row]) >> (8 * col);            
+        }
+        
+        //Mix columns
+        mixed_column[0] = xtimes(original[0]) ^ THREE_TIMES(original[1]) ^ original[2] ^ original[3];
+        mixed_column[1] = xtimes(original[1]) ^ THREE_TIMES(original[2]) ^ original[3] ^ original[0];
+        mixed_column[2] = xtimes(original[2]) ^ THREE_TIMES(original[3]) ^ original[0] ^ original[1];
+        mixed_column[3] = xtimes(original[3]) ^ THREE_TIMES(original[0]) ^ original[1] ^ original[2];
+        
+        temp[0] = mixed_column[0] << (8 * col);
+        temp[1] = mixed_column[1] << (8 * col);
+        temp[2] = mixed_column[2] << (8 * col);
+        temp[3] = mixed_column[3] << (8 * col);
+    }
+    
+    state[0] = temp[0];
+    state[1] = temp[1];
+    state[2] = temp[2];
+    state[3] = temp[3];    
 }
