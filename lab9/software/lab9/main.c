@@ -17,12 +17,16 @@ unsigned int RotWord(unsigned int n);
 void KeyExpansion(unsigned char * key, unsigned int * w, int Nk);
 void AddRoundKey(unsigned char * state, unsigned int * RoundKey);
 void ShiftRows(uint *in);
-void SubWord(uint *in);
+unsigned int SubWord(uint in);
 void SubBytes(uint *in);
-uchar xchar(uchar in);
+uchar xtimes(uchar in);
 void MixColumns(unsigned char *state);
 
-#define THREE_TIMES(in) xtime(in) ^ in
+static int Nr = 10;
+static int Nb = 4;
+static int Nk = 4;
+
+#define THREE_TIMES(in) xtimes(in) ^ in
 
 // Pointer to base address of AES module, make sure it matches Qsys
 volatile unsigned int * AES_PTR = (unsigned int *) 0x00000100;
@@ -80,19 +84,36 @@ char charsToHex(char c1, char c2)
 void encrypt(unsigned char * msg_ascii, unsigned char * key_ascii, unsigned int * msg_enc, unsigned int * key)
 {
 	// Implement this function
+	unsigned char in[16];
+	unsigned char out[16];
+	unsigned char key_char[16];
+	unsigned int w[44];
+	int i;
+	for (i=0; i<16; i++){
+		in[i] = charsToHex(msg_ascii[i*2], msg_ascii[i*2+1]);
+		key_char[i] = charsToHex(key_ascii[i*2], key_ascii[i*2+1]);
+	}
+	KeyExpansion(key_char, w, Nk);
 	unsigned char state[4*Nb];
-	state = in;
-	AddRoundKey(state, w[0, Nb-1]);
+	for (i=0; i<16; i++){
+		state[i] = in[i];
+	}
+	AddRoundKey(state, w[0]);
 	for (int round = 1; round < Nr; round++){
 		SubBytes(state);
 		ShiftRows(state);
 		MixColumns(state);
-		AddRoundKey(state, w[round*Nb, (round+1)*Nb-1]);
+		AddRoundKey(state, w[round*Nb]);
 	}
 	SubBytes(state);
 	ShiftRows(state);
-	AddRoundKeys(state, w[Nr*Nb, (Nr+1)*Nb-1]);
-	out = state;
+	AddRoundKey(state, w[Nr*Nb]);
+	for (i=0; i<16; i++){
+		out[i] = state[i];
+	}
+	for (i=0; i<4; i++){
+		msg_enc[i] = out[4*i]<<24 + out[4*i+1]<<16 + out[4*i+2]<<8 + out[4*i+3];
+	}
 }
 
 /** decrypt
@@ -263,17 +284,18 @@ void SubBytes(uint *in)
     }
 }
 
-void SubWord(uint *in)
+unsigned int SubWord(uint in)
 {
     uchar original[4] = {0,0,0,0};
     uchar subbed[4] = {0,0,0,0};
+    uint result;
     
     //Split a 32bits int to 4 X 8bits.
     uint mask = 0;
     for (int byte = 0; byte < 4; byte++)
     {
         mask = 0xFF << (8 * byte);
-        original[byte] = (mask & in[row]) >> (8 * byte);
+        original[byte] = (mask & in) >> (8 * byte);
     }
     
     //Sub them
@@ -283,7 +305,8 @@ void SubWord(uint *in)
     }
 
     //Merge them 
-    in = subbed[0] | (subbed[1] << 8) | (subbed[2] << 16) | (subbed[3] << 24);
+    result = subbed[0] | (subbed[1] << 8) | (subbed[2] << 16) | (subbed[3] << 24);
+    return result;
 }
 
 
