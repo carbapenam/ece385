@@ -13,6 +13,12 @@ University of Illinois ECE Department
 #include <time.h>
 #include "aes.h"
 
+unsigned int RotWord(unsigned int n);
+void KeyExpansion(unsigned char * key, unsigned int * w, int Nk);
+void AddRoundKey(unsigned char * state, unsigned int * RoundKey);
+void ShiftRows(uint *in);
+void SubBytes(uint *in);
+
 // Pointer to base address of AES module, make sure it matches Qsys
 volatile unsigned int * AES_PTR = (unsigned int *) 0x00000100;
 
@@ -198,4 +204,56 @@ void AddRoundKey(unsigned char * state, unsigned int * RoundKey){
 		state[i*4+2] ^= ((RoundKey[i] << 16)>>24);
 		state[i*4+3] ^= ((RoundKey[i] << 24)>>24);
 	}
+}
+
+void ShiftRows(uint *in)
+{
+    uchar original[4] = {0,0,0,0};
+    uchar shifted[4] = {0,0,0,0};
+    
+    for (int row = 1; row < 4; row++)
+    {
+        //Split each of the 32bits int to 4 X 8bits.
+        uint mask = 0;
+        for (int byte = 0; byte < 4; byte++)
+        {
+            mask = 0xFF << (8 * byte);
+            original[byte] = (mask & in[row]) >> (8 * byte);
+        }
+        
+        //Shift them 
+        for (int byte = 0; byte < 4; byte++)
+        {
+            shifted[byte] = original[(row + byte) % 4];            
+        }
+
+        //Merge them 
+        in[row] = shifted[0] | (shifted[1] << 8) | (shifted[2] << 16) | (shifted[3] << 24);  
+    }
+}
+
+void SubBytes(uint *in)
+{
+    uchar original[4] = {0,0,0,0};
+    uchar subbed[4] = {0,0,0,0};
+    
+    for (int row = 0; row < 4; row++)
+    {
+        //Split each of the 32bits int to 4 X 8bits.
+        uint mask = 0;
+        for (int byte = 0; byte < 4; byte++)
+        {
+            mask = 0xFF << (8 * byte);
+            original[byte] = (mask & in[row]) >> (8 * byte);
+        }
+        
+        //Sub them
+        for (int byte = 0; byte < 4; byte++)
+        {
+            subbed[byte] = aes_sbox[original[byte]];            
+        }
+
+        //Merge them 
+        in[row] = subbed[0] | (subbed[1] << 8) | (subbed[2] << 16) | (subbed[3] << 24);  
+    }
 }
