@@ -1,9 +1,7 @@
 /************************************************************************
 Lab 9 Nios Software
-
 Dong Kai Wang, Fall 2017
 Christine Chen, Fall 2013
-
 For use with ECE 385 Experiment 9
 University of Illinois ECE Department
 ************************************************************************/
@@ -88,31 +86,58 @@ void encrypt(unsigned char * msg_ascii, unsigned char * key_ascii, unsigned int 
 	unsigned char out[16];
 	unsigned char key_char[16];
 	unsigned int w[44];
-	int i;
-	for (i=0; i<16; i++){
-		in[i] = charsToHex(msg_ascii[i*2], msg_ascii[i*2+1]);
-		key_char[i] = charsToHex(key_ascii[i*2], key_ascii[i*2+1]);
+	int i, j;
+	for (i=0; i<4; i++)
+	    for (j=0; j<4; j++)
+	{
+		in[j*4+i] = charsToHex(msg_ascii[(i*4+j)*2], msg_ascii[(i*4+j)*2+1]);
+		key_char[i*4+j] = charsToHex(key_ascii[(i*4+j)*2], key_ascii[(i*4+j)*2+1]);
+		key[i*4+j] = key_char[i*4+j];
+		printf("%x", key[i*4+j]);
 	}
+	printf("\n");
+
 	KeyExpansion(key_char, w, Nk);
 	unsigned char state[4*Nb];
 	for (i=0; i<16; i++){
 		state[i] = in[i];
+		printf("%x\n", state[i]);
 	}
-	AddRoundKey(state, w[0]);
+	AddRoundKey(state, w);
+	for (i=0; i<16; i++){
+		printf("%x\n", state[i]);
+	}
 	for (int round = 1; round < Nr; round++){
 		SubBytes(state);
+		printf("after subbyte %d round\n", round);
+			for (i=0; i<16; i++){
+		printf("%x\n", state[i]);
+	}
 		ShiftRows(state);
+		printf("after shiftrows %d round\n", round);
+			for (i=0; i<16; i++){
+		printf("%x\n", state[i]);
+	}
 		MixColumns(state);
-		AddRoundKey(state, w[round*Nb]);
+		printf("after mixcolumns %d round\n", round);
+			for (i=0; i<16; i++){
+		printf("%x\n", state[i]);
+	}
+		AddRoundKey(state, w+round*Nb);
 	}
 	SubBytes(state);
 	ShiftRows(state);
-	AddRoundKey(state, w[Nr*Nb]);
+	AddRoundKey(state, w+Nr*Nb);
+	printf("final state");
 	for (i=0; i<16; i++){
-		out[i] = state[i];
+		printf("%x\n", state[i]);
+	}
+	for (i=0; i<4; i++)
+	    for (j=0; j<4; j++){
+		out[j*4+i] = state[i*4+j];
 	}
 	for (i=0; i<4; i++){
-		msg_enc[i] = out[4*i]<<24 + out[4*i+1]<<16 + out[4*i+2]<<8 + out[4*i+3];
+		msg_enc[i] = (out[4*i]<<24) | (out[4*i+1]<<16) | (out[4*i+2]<<8) | (out[4*i+3]);
 	}
 }
 
@@ -207,28 +232,33 @@ unsigned int RotWord(unsigned int n){
 void KeyExpansion(unsigned char * key, unsigned int * w, int Nk){
 	unsigned int temp;
 	int i = 0;
+		printf("\n");
 	while (i < Nk){
-		w[i] = key[4*i]<<24 + key[4*i+1]<<16 + key[4*i+2]<<8 + key[4*i+3];
+		w[i] = (key[4*i]<<24) | (key[4*i+1]<<16) | (key[4*i+2]<<8) | (key[4*i+3]);
+		printf("%x\n", w[i]);
 		i = i+1;
 	}
+	printf("\n");
 	i = Nk;
 	while (i < Nb * (Nr+1)){
 		temp = w[i-1];
 		if (i % Nk == 0)
 			temp = SubWord(RotWord(temp)) ^ Rcon[i/Nk];
 		w[i] = w[i-Nk] ^ temp;
+				printf("%x", w[i]);
 		i++;
 	}
+	printf("\n");
 
 }
 
 void AddRoundKey(unsigned char * state, unsigned int * RoundKey){
 	int i;
 	for (i=0; i<Nb; i++){
-		state[i*4] ^= (RoundKey[i] >> 24);
-		state[i*4+1] ^= ((RoundKey[i] << 8)>>24);
-		state[i*4+2] ^= ((RoundKey[i] << 16)>>24);
-		state[i*4+3] ^= ((RoundKey[i] << 24)>>24);
+		state[i] ^= (RoundKey[i] >> 24);
+		state[4+i] ^= ((RoundKey[i] << 8)>>24);
+		state[i+8] ^= ((RoundKey[i] << 16)>>24);
+		state[i+12] ^= ((RoundKey[i] << 24)>>24);
 	}
 }
 
@@ -321,16 +351,16 @@ void MixColumns(unsigned char *state)
 {
     uchar original[4] = {0,0,0,0};
     uchar mixed_column[4] = {0,0,0,0};
-    uint temp[4] = {0, 0, 0, 0}; 
-    uint mask = 0;
+    uint temp[16];
+    //uint mask = 0;
     
-    for (int col = 3; col > -1; col--)
+    for (int col = 0; col < 4; col++)
     {
         for (int row = 0; row < 4; row++)
         {
             //Split the columns
-            mask = 0xFF << (8 * col);
-            original[row] = (mask & state[row]) >> (8 * col);            
+            //mask = 0xFF << (8 * col);
+            original[row] = state[row*4+col];
         }
         
         //Mix columns
@@ -339,14 +369,12 @@ void MixColumns(unsigned char *state)
         mixed_column[2] = xtimes(original[2]) ^ THREE_TIMES(original[3]) ^ original[0] ^ original[1];
         mixed_column[3] = xtimes(original[3]) ^ THREE_TIMES(original[0]) ^ original[1] ^ original[2];
         
-        temp[0] = mixed_column[0] << (8 * col);
-        temp[1] = mixed_column[1] << (8 * col);
-        temp[2] = mixed_column[2] << (8 * col);
-        temp[3] = mixed_column[3] << (8 * col);
+        temp[col] = mixed_column[0];
+        temp[4+col] = mixed_column[1];
+        temp[8+col] = mixed_column[2];
+        temp[12+col] = mixed_column[3];
     }
     
-    state[0] = temp[0];
-    state[1] = temp[1];
-    state[2] = temp[2];
-    state[3] = temp[3];    
+   for (int i=0; i<16; i++)
+        state[i] = temp[i];
 }
