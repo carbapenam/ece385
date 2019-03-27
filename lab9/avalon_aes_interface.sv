@@ -39,7 +39,7 @@ module avalon_aes_interface (
 );
 
 
-
+/*
 logic [31:0] AES_KEY0, AES_KEY1, AES_KEY2, AES_KEY3;
 logic [31:0] AES_MSG_EN0, AES_MSG_EN1, AES_MSG_EN2, AES_MSG_EN3;
 logic [31:0] AES_MSG_DE0, AES_MSG_DE1, AES_MSG_DE2, AES_MSG_DE3;
@@ -58,6 +58,7 @@ unique case (AVL_BYTE_EN):
 	0100:
 	0010:
 	0001:
+*/
 
 
 /*
