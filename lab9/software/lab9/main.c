@@ -27,7 +27,7 @@ static int Nk = 4;
 #define THREE_TIMES(in) xtimes(in) ^ in
 
 // Pointer to base address of AES module, make sure it matches Qsys
-volatile unsigned int * AES_PTR = (unsigned int *) 0x00000100;
+volatile unsigned int * AES_PTR = (unsigned int *) 0x00000040;
 
 // Execution mode: 0 for testing, 1 for benchmarking
 int run_mode = 0;
