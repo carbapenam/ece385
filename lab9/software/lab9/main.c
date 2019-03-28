@@ -93,44 +93,44 @@ void encrypt(unsigned char * msg_ascii, unsigned char * key_ascii, unsigned int 
 		in[j*4+i] = charsToHex(msg_ascii[(i*4+j)*2], msg_ascii[(i*4+j)*2+1]);
 		key_char[i*4+j] = charsToHex(key_ascii[(i*4+j)*2], key_ascii[(i*4+j)*2+1]);
 		key[i*4+j] = key_char[i*4+j];
-		printf("%x", key[i*4+j]);
+//		printf("%x", key[i*4+j]);
 	}
-	printf("\n");
+//	printf("\n");
 
 	KeyExpansion(key_char, w, Nk);
 	unsigned char state[4*Nb];
 	for (i=0; i<16; i++){
 		state[i] = in[i];
-		printf("%x\n", state[i]);
+//		printf("%x\n", state[i]);
 	}
 	AddRoundKey(state, w);
 	for (i=0; i<16; i++){
-		printf("%x\n", state[i]);
+//		printf("%x\n", state[i]);
 	}
 	for (int round = 1; round < Nr; round++){
 		SubBytes(state);
-		printf("after subbyte %d round\n", round);
+//		printf("after subbyte %d round\n", round);
 			for (i=0; i<16; i++){
-		printf("%x\n", state[i]);
+//		printf("%x\n", state[i]);
 	}
 		ShiftRows(state);
-		printf("after shiftrows %d round\n", round);
+//		printf("after shiftrows %d round\n", round);
 			for (i=0; i<16; i++){
-		printf("%x\n", state[i]);
+//		printf("%x\n", state[i]);
 	}
 		MixColumns(state);
-		printf("after mixcolumns %d round\n", round);
+//		printf("after mixcolumns %d round\n", round);
 			for (i=0; i<16; i++){
-		printf("%x\n", state[i]);
+//		printf("%x\n", state[i]);
 	}
 		AddRoundKey(state, w+round*Nb);
 	}
 	SubBytes(state);
 	ShiftRows(state);
 	AddRoundKey(state, w+Nr*Nb);
-	printf("final state");
+//	printf("final state");
 	for (i=0; i<16; i++){
-		printf("%x\n", state[i]);
+//		printf("%x\n", state[i]);
 	}
 	for (i=0; i<4; i++)
 	    for (j=0; j<4; j++){
@@ -139,6 +139,7 @@ void encrypt(unsigned char * msg_ascii, unsigned char * key_ascii, unsigned int 
 	for (i=0; i<4; i++){
 		msg_enc[i] = (out[4*i]<<24) | (out[4*i+1]<<16) | (out[4*i+2]<<8) | (out[4*i+3]);
 	}
+
 }
 
 /** decrypt
@@ -186,6 +187,14 @@ int main()
 				printf("%08x", msg_enc[i]);
 			}
 			printf("\n");
+			AES_PTR[4] = msg_enc[0];
+			AES_PTR[5] = msg_enc[1];
+			AES_PTR[6] = msg_enc[2];
+			AES_PTR[7] = msg_enc[3];
+
+			AES_PTR[10] = 0xDEADBEEF;
+			if (AES_PTR[10] != 0xDEADBEEF)
+				printf("Error !");
 			decrypt(msg_enc, msg_dec, key);
 			printf("\nDecrypted message is: \n");
 			for(i = 0; i < 4; i++){
@@ -232,23 +241,23 @@ unsigned int RotWord(unsigned int n){
 void KeyExpansion(unsigned char * key, unsigned int * w, int Nk){
 	unsigned int temp;
 	int i = 0;
-		printf("\n");
+	//	printf("\n");
 	while (i < Nk){
 		w[i] = (key[4*i]<<24) | (key[4*i+1]<<16) | (key[4*i+2]<<8) | (key[4*i+3]);
-		printf("%x\n", w[i]);
+	//	printf("%x\n", w[i]);
 		i = i+1;
 	}
-	printf("\n");
+//	printf("\n");
 	i = Nk;
 	while (i < Nb * (Nr+1)){
 		temp = w[i-1];
 		if (i % Nk == 0)
 			temp = SubWord(RotWord(temp)) ^ Rcon[i/Nk];
 		w[i] = w[i-Nk] ^ temp;
-				printf("%x", w[i]);
+		//		printf("%x", w[i]);
 		i++;
 	}
-	printf("\n");
+//	printf("\n");
 
 }
 

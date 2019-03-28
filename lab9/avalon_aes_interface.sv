@@ -52,51 +52,47 @@ AES AES_unit(*, .AES_KEY(AES_KEY3, AES_KEY2, AES_KEY1, AES_KEY0),
 
 logic [31:0] registers[16];
 
-always_comb
+always_ff @ (posedge CLK)
 begin
 	if (RESET)
 	begin
 		for (int i=0; i<16; i++)
 		begin
-			registers[16] = 32'b0;
+			registers[i] = 32'b0;
 		end
 	end
 
-	if (AVL_CS)
+	if (AVL_CS && AVL_WRITE)
 	begin
-		if (AVL_WRITE)
+		if (AVL_BYTE_EN[0] == 1'b1)
 		begin
-			if (AVL_BYTE_EN[0] == 1'b0)
-			begin
-				registers[AVL_ADDR][7:0] <= AVL_WRITEDATA[7:0];
-			end
-			
-			if (AVL_BYTE_EN[1] == 1'b0)
-			begin
-				registers[AVL_ADDR][15:8] <= AVL_WRITEDATA[15:8];
-			end
-			
-			if (AVL_BYTE_EN[2] == 1'b0)
-			begin
-				registers[AVL_ADDR][23:16] <= AVL_WRITEDATA[23:16];
-			end
-
-			if (AVL_BYTE_EN[3] == 1'b0)
-			begin
-				registers[AVL_ADDR][31:24] <= AVL_WRITEDATA[31:24];
-			end
+			registers[AVL_ADDR][7:0] <= AVL_WRITEDATA[7:0];
 		end
-		
-		if (AVL_READ)
+			
+		if (AVL_BYTE_EN[1] == 1'b1)
 		begin
-			assign AVL_READDATA = register[AVL_ADDR];
+			registers[AVL_ADDR][15:8] <= AVL_WRITEDATA[15:8];
+		end
+			
+		if (AVL_BYTE_EN[2] == 1'b1)
+		begin
+			registers[AVL_ADDR][23:16] <= AVL_WRITEDATA[23:16];
+		end
+
+		if (AVL_BYTE_EN[3] == 1'b1)
+		begin
+			registers[AVL_ADDR][31:24] <= AVL_WRITEDATA[31:24];
 		end
 	end
+	
+
 end
+
 
 // EXPORT_DATA assigned to the first 2 and last 2 bytes of the Encrypted Message
 assign EXPORT_DATA = {registers[7][31:24], registers[4][15:0]};
 
+assign AVL_READDATA = (AVL_READ && AVL_CS) ? registers[AVL_ADDR] : 32'b0;
 /*
 Reg_32 AES_KEY0(*, .D(AES_KEY[31:0]));
 Reg_32 AES_KEY1(*, .D(AES_KEY[63:32]));

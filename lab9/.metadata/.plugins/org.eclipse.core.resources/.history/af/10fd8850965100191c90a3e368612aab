@@ -1,0 +1,380 @@
+/************************************************************************
+Lab 9 Nios Software
+Dong Kai Wang, Fall 2017
+Christine Chen, Fall 2013
+For use with ECE 385 Experiment 9
+University of Illinois ECE Department
+************************************************************************/
+
+#include <stdlib.h>
+#include <stdio.h>
+#include <time.h>
+#include "aes.h"
+
+unsigned int RotWord(unsigned int n);
+void KeyExpansion(unsigned char * key, unsigned int * w, int Nk);
+void AddRoundKey(unsigned char * state, unsigned int * RoundKey);
+void ShiftRows(uint *in);
+unsigned int SubWord(uint in);
+void SubBytes(uint *in);
+uchar xtimes(uchar in);
+void MixColumns(unsigned char *state);
+
+static int Nr = 10;
+static int Nb = 4;
+static int Nk = 4;
+
+#define THREE_TIMES(in) xtimes(in) ^ in
+
+// Pointer to base address of AES module, make sure it matches Qsys
+volatile unsigned int * AES_PTR = (unsigned int *) 0x00000040;
+
+// Execution mode: 0 for testing, 1 for benchmarking
+int run_mode = 0;
+
+/** charToHex
+ *  Convert a single character to the 4-bit value it represents.
+ *  
+ *  Input: a character c (e.g. 'A')
+ *  Output: converted 4-bit value (e.g. 0xA)
+ */
+char charToHex(char c)
+{
+	char hex = c;
+
+	if (hex >= '0' && hex <= '9')
+		hex -= '0';
+	else if (hex >= 'A' && hex <= 'F')
+	{
+		hex -= 'A';
+		hex += 10;
+	}
+	else if (hex >= 'a' && hex <= 'f')
+	{
+		hex -= 'a';
+		hex += 10;
+	}
+	return hex;
+}
+
+/** charsToHex
+ *  Convert two characters to byte value it represents.
+ *  Inputs must be 0-9, A-F, or a-f.
+ *  
+ *  Input: two characters c1 and c2 (e.g. 'A' and '7')
+ *  Output: converted byte value (e.g. 0xA7)
+ */
+char charsToHex(char c1, char c2)
+{
+	char hex1 = charToHex(c1);
+	char hex2 = charToHex(c2);
+	return (hex1 << 4) + hex2;
+}
+
+/** encrypt
+ *  Perform AES encryption in software.
+ *
+ *  Input: msg_ascii - Pointer to 32x 8-bit char array that contains the input message in ASCII format
+ *         key_ascii - Pointer to 32x 8-bit char array that contains the input key in ASCII format
+ *  Output:  msg_enc - Pointer to 4x 32-bit int array that contains the encrypted message
+ *               key - Pointer to 4x 32-bit int array that contains the input key
+ */
+void encrypt(unsigned char * msg_ascii, unsigned char * key_ascii, unsigned int * msg_enc, unsigned int * key)
+{
+	// Implement this function
+	unsigned char in[16];
+	unsigned char out[16];
+	unsigned char key_char[16];
+	unsigned int w[44];
+	int i, j;
+	for (i=0; i<4; i++)
+	    for (j=0; j<4; j++)
+	{
+		in[j*4+i] = charsToHex(msg_ascii[(i*4+j)*2], msg_ascii[(i*4+j)*2+1]);
+		key_char[i*4+j] = charsToHex(key_ascii[(i*4+j)*2], key_ascii[(i*4+j)*2+1]);
+		key[i*4+j] = key_char[i*4+j];
+		printf("%x", key[i*4+j]);
+	}
+	printf("\n");
+
+	KeyExpansion(key_char, w, Nk);
+	unsigned char state[4*Nb];
+	for (i=0; i<16; i++){
+		state[i] = in[i];
+		printf("%x\n", state[i]);
+	}
+	AddRoundKey(state, w);
+	for (i=0; i<16; i++){
+		printf("%x\n", state[i]);
+	}
+	for (int round = 1; round < Nr; round++){
+		SubBytes(state);
+		printf("after subbyte %d round\n", round);
+			for (i=0; i<16; i++){
+		printf("%x\n", state[i]);
+	}
+		ShiftRows(state);
+		printf("after shiftrows %d round\n", round);
+			for (i=0; i<16; i++){
+		printf("%x\n", state[i]);
+	}
+		MixColumns(state);
+		printf("after mixcolumns %d round\n", round);
+			for (i=0; i<16; i++){
+		printf("%x\n", state[i]);
+	}
+		AddRoundKey(state, w+round*Nb);
+	}
+	SubBytes(state);
+	ShiftRows(state);
+	AddRoundKey(state, w+Nr*Nb);
+	printf("final state");
+	for (i=0; i<16; i++){
+		printf("%x\n", state[i]);
+	}
+	for (i=0; i<4; i++)
+	    for (j=0; j<4; j++){
+		out[j*4+i] = state[i*4+j];
+	}
+	for (i=0; i<4; i++){
+		msg_enc[i] = (out[4*i]<<24) | (out[4*i+1]<<16) | (out[4*i+2]<<8) | (out[4*i+3]);
+	}
+}
+
+/** decrypt
+ *  Perform AES decryption in hardware.
+ *
+ *  Input:  msg_enc - Pointer to 4x 32-bit int array that contains the encrypted message
+ *              key - Pointer to 4x 32-bit int array that contains the input key
+ *  Output: msg_dec - Pointer to 4x 32-bit int array that contains the decrypted message
+ */
+void decrypt(unsigned int * msg_enc, unsigned int * msg_dec, unsigned int * key)
+{
+	// Implement this function
+}
+
+/** main
+ *  Allows the user to enter the message, key, and select execution mode
+ *
+ */
+int main()
+{
+	// Input Message and Key as 32x 8-bit ASCII Characters ([33] is for NULL terminator)
+	unsigned char msg_ascii[33];
+	unsigned char key_ascii[33];
+	// Key, Encrypted Message, and Decrypted Message in 4x 32-bit Format to facilitate Read/Write to Hardware
+	unsigned int key[4];
+	unsigned int msg_enc[4];
+	unsigned int msg_dec[4];
+
+	printf("Select execution mode: 0 for testing, 1 for benchmarking: ");
+	scanf("%d", &run_mode);
+
+	if (run_mode == 0) {
+		// Continuously Perform Encryption and Decryption
+		while (1) {
+			int i = 0;
+			printf("\nEnter Message:\n");
+			scanf("%s", msg_ascii);
+			printf("\n");
+			printf("\nEnter Key:\n");
+			scanf("%s", key_ascii);
+			printf("\n");
+			encrypt(msg_ascii, key_ascii, msg_enc, key);
+			printf("\nEncrpted message is: \n");
+			for(i = 0; i < 4; i++){
+				printf("%08x", msg_enc[i]);
+			}
+			printf("\n");
+			decrypt(msg_enc, msg_dec, key);
+			printf("\nDecrypted message is: \n");
+			for(i = 0; i < 4; i++){
+				printf("%08x", msg_dec[i]);
+			}
+			printf("\n");
+		}
+	}
+	else {
+		// Run the Benchmark
+		int i = 0;
+		int size_KB = 2;
+		// Choose a random Plaintext and Key
+		for (i = 0; i < 32; i++) {
+			msg_ascii[i] = 'a';
+			key_ascii[i] = 'b';
+		}
+		// Run Encryption
+		clock_t begin = clock();
+		for (i = 0; i < size_KB * 64; i++)
+			encrypt(msg_ascii, key_ascii, msg_enc, key);
+		clock_t end = clock();
+		double time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
+		double speed = size_KB / time_spent;
+		printf("Software Encryption Speed: %f KB/s \n", speed);
+		// Run Decryption
+		begin = clock();
+		for (i = 0; i < size_KB * 64; i++)
+			decrypt(msg_enc, msg_dec, key);
+		end = clock();
+		time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
+		speed = size_KB / time_spent;
+		printf("Hardware Encryption Speed: %f KB/s \n", speed);
+	}
+	return 0;
+}
+
+unsigned int RotWord(unsigned int n){
+	unsigned int temp;
+	temp = (n << 8) | (n >> 24);
+	return temp;
+}
+
+void KeyExpansion(unsigned char * key, unsigned int * w, int Nk){
+	unsigned int temp;
+	int i = 0;
+		printf("\n");
+	while (i < Nk){
+		w[i] = (key[4*i]<<24) | (key[4*i+1]<<16) | (key[4*i+2]<<8) | (key[4*i+3]);
+		printf("%x\n", w[i]);
+		i = i+1;
+	}
+	printf("\n");
+	i = Nk;
+	while (i < Nb * (Nr+1)){
+		temp = w[i-1];
+		if (i % Nk == 0)
+			temp = SubWord(RotWord(temp)) ^ Rcon[i/Nk];
+		w[i] = w[i-Nk] ^ temp;
+				printf("%x", w[i]);
+		i++;
+	}
+	printf("\n");
+
+}
+
+void AddRoundKey(unsigned char * state, unsigned int * RoundKey){
+	int i;
+	for (i=0; i<Nb; i++){
+		state[i] ^= (RoundKey[i] >> 24);
+		state[4+i] ^= ((RoundKey[i] << 8)>>24);
+		state[i+8] ^= ((RoundKey[i] << 16)>>24);
+		state[i+12] ^= ((RoundKey[i] << 24)>>24);
+	}
+}
+
+void ShiftRows(uint *in)
+{
+    uchar original[4] = {0,0,0,0};
+    uchar shifted[4] = {0,0,0,0};
+    
+    for (int row = 1; row < 4; row++)
+    {
+        //Split each of the 32bits int to 4 X 8bits.
+        uint mask = 0;
+        for (int byte = 0; byte < 4; byte++)
+        {
+            mask = 0xFF << (8 * byte);
+            original[byte] = (mask & in[row]) >> (8 * byte);
+        }
+        
+        //Shift them 
+        for (int byte = 0; byte < 4; byte++)
+        {
+            shifted[byte] = original[(row + byte) % 4];            
+        }
+
+        //Merge them 
+        in[row] = shifted[0] | (shifted[1] << 8) | (shifted[2] << 16) | (shifted[3] << 24);  
+    }
+}
+
+void SubBytes(uint *in)
+{
+    uchar original[4] = {0,0,0,0};
+    uchar subbed[4] = {0,0,0,0};
+    
+    for (int row = 0; row < 4; row++)
+    {
+        //Split each of the 32bits int to 4 X 8bits.
+        uint mask = 0;
+        for (int byte = 0; byte < 4; byte++)
+        {
+            mask = 0xFF << (8 * byte);
+            original[byte] = (mask & in[row]) >> (8 * byte);
+        }
+        
+        //Sub them
+        for (int byte = 0; byte < 4; byte++)
+        {
+            subbed[byte] = aes_sbox[original[byte]];            
+        }
+
+        //Merge them 
+        in[row] = subbed[0] | (subbed[1] << 8) | (subbed[2] << 16) | (subbed[3] << 24);  
+    }
+}
+
+unsigned int SubWord(uint in)
+{
+    uchar original[4] = {0,0,0,0};
+    uchar subbed[4] = {0,0,0,0};
+    uint result;
+    
+    //Split a 32bits int to 4 X 8bits.
+    uint mask = 0;
+    for (int byte = 0; byte < 4; byte++)
+    {
+        mask = 0xFF << (8 * byte);
+        original[byte] = (mask & in) >> (8 * byte);
+    }
+    
+    //Sub them
+    for (int byte = 0; byte < 4; byte++)
+    {
+        subbed[byte] = aes_sbox[original[byte]];            
+    }
+
+    //Merge them 
+    result = subbed[0] | (subbed[1] << 8) | (subbed[2] << 16) | (subbed[3] << 24);
+    return result;
+}
+
+
+uchar xtimes(uchar in)
+{
+   uchar temp = in << 1;
+   temp = (in>>7 == 1) ? temp ^ 0x1b : temp;
+   return temp;   
+}
+
+void MixColumns(unsigned char *state)
+{
+    uchar original[4] = {0,0,0,0};
+    uchar mixed_column[4] = {0,0,0,0};
+    uint temp[16];
+    //uint mask = 0;
+    
+    for (int col = 0; col < 4; col++)
+    {
+        for (int row = 0; row < 4; row++)
+        {
+            //Split the columns
+            //mask = 0xFF << (8 * col);
+            original[row] = state[row*4+col];
+        }
+        
+        //Mix columns
+        mixed_column[0] = xtimes(original[0]) ^ THREE_TIMES(original[1]) ^ original[2] ^ original[3];
+        mixed_column[1] = xtimes(original[1]) ^ THREE_TIMES(original[2]) ^ original[3] ^ original[0];
+        mixed_column[2] = xtimes(original[2]) ^ THREE_TIMES(original[3]) ^ original[0] ^ original[1];
+        mixed_column[3] = xtimes(original[3]) ^ THREE_TIMES(original[0]) ^ original[1] ^ original[2];
+        
+        temp[col] = mixed_column[0];
+        temp[4+col] = mixed_column[1];
+        temp[8+col] = mixed_column[2];
+        temp[12+col] = mixed_column[3];
+    }
+    
+   for (int i=0; i<16; i++)
+        state[i] = temp[i];
+}
