@@ -48,18 +48,54 @@ logic [31:0] AES_START, AES_DONE;
 AES AES_unit(*, .AES_KEY(AES_KEY3, AES_KEY2, AES_KEY1, AES_KEY0), 
 .AES_MSG_ENC(AES_MSG_EN3, AES_MSG_EN2, AES_MSG_EN1, AES_MSG_EN0), 
 .AES_MSG_DEC(AES_MSG_DE3, AES_MSG_DE2, AES_MSG_DE1, AES_MSG_DE0),
-.AES_Start, .AES_DONE);
+.AES_Start, .AES_DONE);*/
 
-unique case (AVL_BYTE_EN):
-	1111:
-	1100:
-	0011:
-	1000:
-	0100:
-	0010:
-	0001:
-*/
+logic [31:0] registers[16];
 
+always_comb
+begin
+	if (RESET)
+	begin
+		for (int i=0; i<16; i++)
+		begin
+			registers[16] = 32'b0;
+		end
+	end
+
+	if (AVL_CS)
+	begin
+		if (AVL_WRITE)
+		begin
+			if (AVL_BYTE_EN[0] == 1'b0)
+			begin
+				registers[AVL_ADDR][7:0] <= AVL_WRITEDATA[7:0];
+			end
+			
+			if (AVL_BYTE_EN[1] == 1'b0)
+			begin
+				registers[AVL_ADDR][15:8] <= AVL_WRITEDATA[15:8];
+			end
+			
+			if (AVL_BYTE_EN[2] == 1'b0)
+			begin
+				registers[AVL_ADDR][23:16] <= AVL_WRITEDATA[23:16];
+			end
+
+			if (AVL_BYTE_EN[3] == 1'b0)
+			begin
+				registers[AVL_ADDR][31:24] <= AVL_WRITEDATA[31:24];
+			end
+		end
+		
+		if (AVL_READ)
+		begin
+			assign AVL_READDATA = register[AVL_ADDR];
+		end
+	end
+end
+
+// EXPORT_DATA assigned to the first 2 and last 2 bytes of the Encrypted Message
+assign EXPORT_DATA = {registers[7][31:24], registers[4][15:0]};
 
 /*
 Reg_32 AES_KEY0(*, .D(AES_KEY[31:0]));
