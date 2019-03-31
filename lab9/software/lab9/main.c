@@ -171,41 +171,43 @@ void decrypt(unsigned int * msg_enc, unsigned int * msg_dec, unsigned int * key)
 	unsigned char out[16];
 	unsigned char key_char[16];
 	unsigned int w[44];
-	int i, j;
-	for (i=0; i<4; i++)
-	    for (j=0; j<4; j++)
+
+	for (int row=0; row<4; row++)
 	{
-		in[j*4+i] = charsToHex(msg_ascii[(i*4+j)*2], msg_ascii[(i*4+j)*2+1]);
-		key_char[i*4+j] = charsToHex(key_ascii[(i*4+j)*2], key_ascii[(i*4+j)*2+1]);
-		key[i*4+j] = key_char[i*4+j];
-//		printf("%x", key[i*4+j]);
+        uint mask = 0;
+        for (int byte = 0; byte < 4; byte++)
+        {
+            mask = 0xFF << (8 * byte);
+            in[byte+row*4] = (mask & msg_enc[row]) >> (8 * byte);
+    		key_char[byte+row*4] = (mask & key[row]) >> (8 * byte);
+        }
 	}
 //	printf("\n");
 
 	KeyExpansion(key_char, w, Nk);
 	unsigned char state[4*Nb];
-	for (i=0; i<16; i++){
+	for (int i=0; i<16; i++){
 		state[i] = in[i];
 //		printf("%x\n", state[i]);
 	}
 	AddRoundKey(state, w);
-	for (i=0; i<16; i++){
+	for (int i=0; i<16; i++){
 //		printf("%x\n", state[i]);
 	}
 	for (int round = Nr; round > 0; round--){
 		InvShiftRows(state);
 //		printf("after invshiftrows %d round\n", round);
-			for (i=0; i<16; i++){
+			for (int i=0; i<16; i++){
 //		printf("%x\n", state[i]);
 	}
 		InvSubBytes(state);
 //		printf("after invsubbytes %d round\n", round);
-			for (i=0; i<16; i++){
+			for (int i=0; i<16; i++){
 //		printf("%x\n", state[i]);
 	}
 		AddRoundKey(state, w+round*Nb);
 //		printf("after mixcolumns %d round\n", round);
-			for (i=0; i<16; i++){
+			for (int i=0; i<16; i++){
 //		printf("%x\n", state[i]);
 	}
 		InvMixColumns(state);
@@ -214,14 +216,14 @@ void decrypt(unsigned int * msg_enc, unsigned int * msg_dec, unsigned int * key)
     InvSubBytes(state);
 	AddRoundKey(state, w);
 //	printf("final state");
-	for (i=0; i<16; i++){
+	for (int i=0; i<16; i++){
 //		printf("%x\n", state[i]);
 	}
-	for (i=0; i<4; i++)
-	    for (j=0; j<4; j++){
+	for (int i=0; i<4; i++)
+	    for (int j=0; j<4; j++){
 		out[j*4+i] = state[i*4+j];
 	}
-	for (i=0; i<4; i++){
+	for (int i=0; i<4; i++){
 		msg_dec[i] = (out[4*i]<<24) | (out[4*i+1]<<16) | (out[4*i+2]<<8) | (out[4*i+3]);
 	}
 }
@@ -480,7 +482,6 @@ void InvShiftRows(uint *in)
         //Merge them 
         in[row] = shifted[0] | (shifted[1] << 8) | (shifted[2] << 16) | (shifted[3] << 24);  
     }
-    
 }
 
 void InvSubBytes(uint *in)
@@ -543,5 +544,5 @@ void InvMixColumns(unsigned char *state)
 
 void InvAddRoundKey(unsigned char * state, unsigned int * RoundKey)
 {
-    AddRoundKey(unsigned char * state, unsigned int * RoundKey);
+    AddRoundKey(state, RoundKey);
 }
