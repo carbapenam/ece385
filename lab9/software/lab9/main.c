@@ -11,6 +11,7 @@ University of Illinois ECE Department
 #include <time.h>
 #include "aes.h"
 
+// Encryption forward declaration
 unsigned int RotWord(unsigned int n);
 void KeyExpansion(unsigned char * key, unsigned int * w, int Nk);
 void AddRoundKey(unsigned char * state, unsigned int * RoundKey);
@@ -20,11 +21,26 @@ void SubBytes(uint *in);
 uchar xtimes(uchar in);
 void MixColumns(unsigned char *state);
 
+// Decryption forward declaration
+void InvShiftRows(uint *in);
+void InvSubBytes(uint *in);
+void InvMixColumns(unsigned char *state);
+void InvAddRoundKey(unsigned char * state, unsigned int * RoundKey);
+
 static int Nr = 10;
 static int Nb = 4;
 static int Nk = 4;
 
+// hahahahahahahahahaha what a joke
+// i know that there's a lookup table. don't @ me.
+
 #define THREE_TIMES(in) xtimes(in) ^ in
+#define FOUR_TIMES(in) xtimes(xtimes(in))
+#define EIGHT_TIMES(in) xtimes(FOUR_TIMES(in))
+#define NINE_TIMES(in) EIGHT_TIMES(in) ^ in
+#define B_TIMES(in) EIGHT_TIMES(in) ^ xtimes(in) ^ in
+#define D_TIMES(in) EIGHT_TIMES(in) ^ FOUR_TIMES(in) ^ in
+#define E_TIMES(in) EIGHT_TIMES(in) ^ FOUR_TIMES(in) ^ xtimes(in)
 
 // Pointer to base address of AES module, make sure it matches Qsys
 volatile unsigned int * AES_PTR = (unsigned int *) 0x00000040;
@@ -139,7 +155,6 @@ void encrypt(unsigned char * msg_ascii, unsigned char * key_ascii, unsigned int 
 	for (i=0; i<4; i++){
 		msg_enc[i] = (out[4*i]<<24) | (out[4*i+1]<<16) | (out[4*i+2]<<8) | (out[4*i+3]);
 	}
-
 }
 
 /** decrypt
@@ -152,6 +167,63 @@ void encrypt(unsigned char * msg_ascii, unsigned char * key_ascii, unsigned int 
 void decrypt(unsigned int * msg_enc, unsigned int * msg_dec, unsigned int * key)
 {
 	// Implement this function
+	unsigned char in[16];
+	unsigned char out[16];
+	unsigned char key_char[16];
+	unsigned int w[44];
+	int i, j;
+	for (i=0; i<4; i++)
+	    for (j=0; j<4; j++)
+	{
+		in[j*4+i] = charsToHex(msg_ascii[(i*4+j)*2], msg_ascii[(i*4+j)*2+1]);
+		key_char[i*4+j] = charsToHex(key_ascii[(i*4+j)*2], key_ascii[(i*4+j)*2+1]);
+		key[i*4+j] = key_char[i*4+j];
+//		printf("%x", key[i*4+j]);
+	}
+//	printf("\n");
+
+	KeyExpansion(key_char, w, Nk);
+	unsigned char state[4*Nb];
+	for (i=0; i<16; i++){
+		state[i] = in[i];
+//		printf("%x\n", state[i]);
+	}
+	AddRoundKey(state, w);
+	for (i=0; i<16; i++){
+//		printf("%x\n", state[i]);
+	}
+	for (int round = Nr; round > 0; round--){
+		InvShiftRows(state);
+//		printf("after invshiftrows %d round\n", round);
+			for (i=0; i<16; i++){
+//		printf("%x\n", state[i]);
+	}
+		InvSubBytes(state);
+//		printf("after invsubbytes %d round\n", round);
+			for (i=0; i<16; i++){
+//		printf("%x\n", state[i]);
+	}
+		AddRoundKey(state, w+round*Nb);
+//		printf("after mixcolumns %d round\n", round);
+			for (i=0; i<16; i++){
+//		printf("%x\n", state[i]);
+	}
+		InvMixColumns(state);
+	}
+	InvShiftRows(state);
+    InvSubBytes(state);
+	AddRoundKey(state, w);
+//	printf("final state");
+	for (i=0; i<16; i++){
+//		printf("%x\n", state[i]);
+	}
+	for (i=0; i<4; i++)
+	    for (j=0; j<4; j++){
+		out[j*4+i] = state[i*4+j];
+	}
+	for (i=0; i<4; i++){
+		msg_dec[i] = (out[4*i]<<24) | (out[4*i+1]<<16) | (out[4*i+2]<<8) | (out[4*i+3]);
+	}
 }
 
 /** main
@@ -187,14 +259,11 @@ int main()
 				printf("%08x", msg_enc[i]);
 			}
 			printf("\n");
-			AES_PTR[4] = msg_enc[0];
-			AES_PTR[5] = msg_enc[1];
-			AES_PTR[6] = msg_enc[2];
-			AES_PTR[7] = msg_enc[3];
+			AES_PTR[4] = msg_enc[3];
+			AES_PTR[5] = msg_enc[2];
+			AES_PTR[6] = msg_enc[1];
+			AES_PTR[7] = msg_enc[0];
 
-			AES_PTR[10] = 0xDEADBEEF;
-			if (AES_PTR[10] != 0xDEADBEEF)
-				printf("Error !");
 			decrypt(msg_enc, msg_dec, key);
 			printf("\nDecrypted message is: \n");
 			for(i = 0; i < 4; i++){
@@ -289,7 +358,7 @@ void ShiftRows(uint *in)
         //Shift them 
         for (int byte = 0; byte < 4; byte++)
         {
-            shifted[byte] = original[(row + byte) % 4];            
+            shifted[byte] = original[(byte + row) % 4];            
         }
 
         //Merge them 
@@ -348,7 +417,6 @@ unsigned int SubWord(uint in)
     return result;
 }
 
-
 uchar xtimes(uchar in)
 {
    uchar temp = in << 1;
@@ -386,4 +454,94 @@ void MixColumns(unsigned char *state)
     
    for (int i=0; i<16; i++)
         state[i] = temp[i];
+}
+
+void InvShiftRows(uint *in)
+{
+    uchar original[4] = {0,0,0,0};
+    uchar shifted[4] = {0,0,0,0};
+    
+    for (int row = 1; row < 4; row++)
+    {
+        //Split each of the 32bits int to 4 X 8bits.
+        uint mask = 0;
+        for (int byte = 0; byte < 4; byte++)
+        {
+            mask = 0xFF << (8 * byte);
+            original[byte] = (mask & in[row]) >> (8 * byte);
+        }
+        
+        //Shift them 
+        for (int byte = 0; byte < 4; byte++)
+        {
+            shifted[byte] = original[(byte - row + 4) % 4]; //shift right.           
+        }
+
+        //Merge them 
+        in[row] = shifted[0] | (shifted[1] << 8) | (shifted[2] << 16) | (shifted[3] << 24);  
+    }
+    
+}
+
+void InvSubBytes(uint *in)
+{
+    uchar original[4] = {0,0,0,0};
+    uchar subbed[4] = {0,0,0,0};
+    
+    for (int row = 0; row < 4; row++)
+    {
+        //Split each of the 32bits int to 4 X 8bits.
+        uint mask = 0;
+        for (int byte = 0; byte < 4; byte++)
+        {
+            mask = 0xFF << (8 * byte);
+            original[byte] = (mask & in[row]) >> (8 * byte);
+        }
+        
+        //Sub them
+        for (int byte = 0; byte < 4; byte++)
+        {
+            subbed[byte] = aes_invsbox[original[byte]];            
+        }
+
+        //Merge them 
+        in[row] = subbed[0] | (subbed[1] << 8) | (subbed[2] << 16) | (subbed[3] << 24);  
+    }
+    
+}
+
+void InvMixColumns(unsigned char *state)
+{
+    uchar original[4] = {0,0,0,0};
+    uchar mixed_column[4] = {0,0,0,0};
+    uint temp[16];
+    
+    for (int col = 0; col < 4; col++)
+    {
+        for (int row = 0; row < 4; row++)
+        {
+            //Split the columns
+            //mask = 0xFF << (8 * col);
+            original[row] = state[row*4+col];
+        }
+        
+        //I'm crying.
+        mixed_column[0] = E_TIMES(original[0]) ^ B_TIMES(original[1]) ^ D_TIMES(original[2]) ^ NINE_TIMES(original[3]);
+        mixed_column[1] = E_TIMES(original[1]) ^ B_TIMES(original[2]) ^ D_TIMES(original[3]) ^ NINE_TIMES(original[0]);
+        mixed_column[2] = E_TIMES(original[2]) ^ B_TIMES(original[3]) ^ D_TIMES(original[0]) ^ NINE_TIMES(original[1]);
+        mixed_column[3] = E_TIMES(original[3]) ^ B_TIMES(original[0]) ^ D_TIMES(original[1]) ^ NINE_TIMES(original[2]);
+        
+        temp[col] = mixed_column[0];
+        temp[4+col] = mixed_column[1];
+        temp[8+col] = mixed_column[2];
+        temp[12+col] = mixed_column[3];
+    }
+    
+   for (int i=0; i<16; i++)
+        state[i] = temp[i];    
+}
+
+void InvAddRoundKey(unsigned char * state, unsigned int * RoundKey)
+{
+    AddRoundKey(unsigned char * state, unsigned int * RoundKey);
 }
