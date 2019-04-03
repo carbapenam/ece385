@@ -89,10 +89,18 @@ begin
 end
 
 
+AES lab9_aes(.*, .AES_START(registers[14][0]), .AES_DONE(registers[15][0]), 
+					.AES_KEY(registers[0]), .AES_MSG_ENC(registers[4]), 
+					.AES_MSG_DEC(registers[8]));
+
+
 // EXPORT_DATA assigned to the first 2 and last 2 bytes of the Encrypted Message
-assign EXPORT_DATA = {registers[7][31:24], registers[4][15:0]};
+assign EXPORT_DATA = {registers[4][31:16], registers[7][15:0]};
 
 assign AVL_READDATA = (AVL_READ && AVL_CS) ? registers[AVL_ADDR] : 32'b0;
+
+
+
 /*
 Reg_32 AES_KEY0(*, .D(AES_KEY[31:0]));
 Reg_32 AES_KEY1(*, .D(AES_KEY[63:32]));

@@ -17,12 +17,13 @@ module AES (
 	output logic [127:0] AES_MSG_DEC
 );
 
-enum logic[1:0] {WAIT, DONE, InvShiftRows, InvMixColumns, KeyExpansion,
-						AddRoundKey_0, AddRoundKey, InvSubBytes} curr_state, next_state;
-logic [1407:0] KeySchdule;
+enum logic[4:0] {WAIT, DONE, InvShiftRows, InvMixColumns_0, KeyExpansion,
+						AddRoundKey_0, AddRoundKey, InvSubBytes, InvMixColumns_1,
+						InvMixColumns_2, InvMixColumns_3} curr_state, next_state;
+logic [1407:0] KeySchedule;
 logic [127:0] state, RoundKey;
-logic [3:0] round;
-
+integer round;
+logic [31:0] temp;
 
 always_ff @ (posedge CLK or posedge RESET)  
     begin
@@ -56,10 +57,16 @@ always_comb
 					next_state = AddRoundKey;
 				AddRoundKey:
 					if (round > 0)
-						next_state = InvMixColumns;
+						next_state = InvMixColumns_0;
 					else
 						next_state = DONE;
-				InvMixColumns:
+				InvMixColumns_0:
+						next_state = InvMixColumns_1;
+				InvMixColumns_1:
+						next_state = InvMixColumns_2;
+				InvMixColumns_2:
+						next_state = InvMixColumns_3;
+				InvMixColumns_3:
 						next_state = InvShiftRows;
         endcase
 	 end
@@ -83,26 +90,61 @@ always_comb
 		
 				KeyExpansion:
 				begin
-					KeyExpansion lab9_KeyExpansion(.clk(CLK), .CipherKey(AES_KEY), .KeySchedule);
+
 				end
 
 				AddRoundKey_0:
 				begin
-					AddRoundKey lab9_AddRoundKey(.*);
+
 				end
 				
 				AddRoundKey:
 				begin
-					AddRoundKey lab9_AddRoundKey(.*);
+
 				end
 				
 				InvShiftRows:
 				begin
-					InvShiftRows lab9_InvShiftRows(.data_in(state), .data_out(state));
+					
 				end
 				
 				InvSubBytes:
 				begin
+
+				end
+				
+				InvMixColumns_0:
+				begin
+					round = round - 1;
+					temp = state[127:96];
+					state[127:96] = temp;
+				end
+				
+				InvMixColumns_1:
+				begin
+					temp = state[95:64];
+					state[95:64] = temp;
+				end
+				
+				InvMixColumns_2:
+				begin
+					temp = state[63:32];
+					state[63:32] = temp;
+				end
+				
+				InvMixColumns_3:
+				begin
+					temp = state[31:0];
+					state[31:0] = temp;
+				end
+		endcase
+	end
+	
+
+	
+KeyExpansion lab9_KeyExpansion(.clk(CLK), .CipherKey(AES_KEY), .KeySchedule(KeySchedule));	
+AddRoundKey lab9_AddRoundKey(.old_state(state), .roundkey(KeySchedule[128*round +: 128]), .new_state(state));
+InvShiftRows lab9_InvShiftRows(.data_in(state), .data_out(state));
 					InvSubBytes lab9_InvSubBytes0(.clk(CLK), .in(state[7:0]), .out(state[7:0]));
 					InvSubBytes lab9_InvSubBytes1(.clk(CLK), .in(state[15:8]), .out(state[15:8]));
 					InvSubBytes lab9_InvSubBytes2(.clk(CLK), .in(state[23:16]), .out(state[23:16]));
@@ -119,20 +161,8 @@ always_comb
 					InvSubBytes lab9_InvSubBytes13(.clk(CLK), .in(state[111:104]), .out(state[111:104]));
 					InvSubBytes lab9_InvSubBytes14(.clk(CLK), .in(state[119:112]), .out(state[119:112]));
 					InvSubBytes lab9_InvSubBytes15(.clk(CLK), .in(state[127:120]), .out(state[127:120]));
-				end
-				
-				InvMixColumns:
-				begin
-					round = round - 1;
-					InvMixColumns lab9_InvMixColumns0(.data_in(state[31:0]), .data_out(state[31:0]);
-					InvMixColumns lab9_InvMixColumns1(.data_in(state[63:32]), .data_out(state[63:32]);
-					InvMixColumns lab9_InvMixColumns2(.data_in(state[95:64]), .data_out(state[95:64]);
-					InvMixColumns lab9_InvMixColumns3(.data_in(state[127:96]), .data_out(state[127:96]);
-				end
-		endcase
-	end
-					
-	 
+InvMixColumns lab9_InvMixColumns0(.data_in(temp), .data_out(temp));			
+ 
 endmodule
 
 
